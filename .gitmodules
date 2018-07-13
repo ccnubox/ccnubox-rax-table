@@ -1,0 +1,3 @@
+[submodule "box-ui"]
+	path = box-ui
+	url = git://github.com/ccnubox/box-ui.git
