@@ -1,14 +1,10 @@
 .app {
-  flex: 1;
+  /* flex: 1;
   justify-content: center;
-  align-items: center;
+  align-items: center; */
   background-color: #efeff4;
   width: 750;
   height: 1200;
-}
-
-.item_text {
-  color: #6767fa;
 }
 
 .center {
@@ -16,5 +12,48 @@
   justify-content: center;
   flex-direction: row;
   align-items: center;
+}
+
+.header {
+  height: 90;
+  background-color: #f8f8f8;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+}
+
+.choose_label {
+  width: 250;
+}
+
+.down_triangle {
+  width: 20;
+  height: 20;
+}
+
+.dropdown_container {
+  position: absolute;
+  top: 90;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  align-items: center;
+}
+
+.dropdown_list {
+  height: 500;
+  width: 250;
+  background-color: #ffffff;
+}
+
+.option_text {
+  color: #434343;
+}
+
+.set_button {
+  background-color: #6767fa;
   
+}
+.button_text {
+  color: #ffffff;
 }

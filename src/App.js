@@ -11,6 +11,8 @@ import Button from "rax-button";
 import Image from "rax-image";
 import ScrollView from "rax-scrollview";
 
+const { View: AnimatedView } = Animated;
+
 class Dropdown extends Component {
   constructor(props) {
     super(props);
@@ -94,7 +96,7 @@ class Dropdown extends Component {
           onClick={() => {
             this.hide();
           }}
-          style={styles.center}
+          style={[styles.center]}
         >
           <Touchable>{children}</Touchable>
         </AnimatedView>
@@ -102,54 +104,81 @@ class Dropdown extends Component {
     );
   }
 }
-
+var week = 1;
 class Header extends Component {
   constructor(props) {
     super(props);
-    this.weekOptions = this.weekOPt(20);// week
+    this.WeekOptions =  ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九","二十"];
     this.state = {
-      value: week,
+      currentWeek: week, // 当前周
+      choosedWeek: week, // 设为当前周
       showsVerticalScrollIndicator: false,
-      chooseWeek: { value: 1, text: "第一周" }
+      chooseOnblur: false
     };
   }
-  weekOPt(n) {
-    let arr = [];
-    let i = 1;
-    week = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九","二十"]
-    while (i <= n) {
-      arr[i] = {
-        value: i,
-        text: "第" + week[i] + "周"
-      }
-    }
-    return arr;
-  }
+
+  showWeekModal = () => {
+    this.refs.weekModal.show();
+    // this.setState({
+      
+    // })
+  };
+
+  hideWeekModal = index => {
+    this.setState({
+      currentWeek: index + 1
+    });
+    this.refs.weekModal.hide();
+  };
+
+  chooseWeek = index => {
+    // 
+  };
+
   render() {
     return (
       <View>
+        <View style={[styles.header, styles.center]}>
+        <Touchable
+            onPress={this.showWeekModal}
+            style={[styles.choose_label, styles.center]}
+          >
+            <Text>第{this.state.choosedWeek}周</Text>
+            <Image
+              style={styles.down_triangle}
+              source={require("./assets/triangle_down.png")}
+              resizeMode="cover"
+            />
+          </Touchable>
+        <View style={styles.dropdown_container}>
         <Dropdown ref="weekModal">
         <ScrollView 
         ref={scrollView => {
           this.scrollView = scrollView;
         }}
-        style={styles.dropdown_list}>
-        <View
-          style={[styles.select_item, styles.item_border]}
-          onClick={() => {
-            this.hideYearModal(year);
-          }}
+        style={styles.dropdown_list}
         >
-          <Text style={styles.item_text}>
-            {this.weekOptions.map((item) => {
+            {this.WeekOptions.map((item, index) => {
               return (
-                <Text>{item.text}</Text>
+                <View
+                  style={[styles.option_item, styles.center]}
+                  onClick={() => {
+                    this.chooseWeek(index);
+                  }}
+                >
+                  <Text style={styles.option_text}>
+                    第{this.WeekOptions[index]}周
+                  </Text>
+                </View>
               )
             })}
-          </Text>
-        </View>
         </ScrollView>
+        <Button onPress={() => this.changeWeek()} style={[styles.set_button]}>
+          <Text style={[styles.button_text]}>设为当前周</Text>
+        </Button>
         </Dropdown>
+        </View>
+        </View>
       </View>
     );
   }
@@ -159,12 +188,7 @@ class App extends Component {
   render() {
     return (
       <View style={styles.app}>
-        <View style={styles.appHeader}>
-          <Text style={styles.appBanner}>Welcome to Rax</Text>
-        </View>
-        <Text style={styles.appIntro}>
-          To get started, edit src/App.js and save to reload.
-        </Text>
+        <Header></Header>
       </View>
     );
   }
