@@ -71,28 +71,63 @@
 .set_button {
   background-color: #6767fa;
 }
+
 .button_text {
   color: #ffffff;
 }
+
 .choose_text {
   font-size: 35;
 }
+
 .option_container {
   padding: 0 20;
 }
+
 .option_item {
   border-bottom: 1 solid #efeff4;
 }
-.button_text, .option_item{
+
+.button_text,
+.option_item {
   padding: 10 0;
 }
+
 .choosing_option_item {
   background-color: rgb(207, 208, 209);
 }
+
 .current {
   color: #f6b37f;
   font-size: 20;
 }
-.not_display {
+
+/* .not_display {
   display: none;
+} */
+
+/* .table {
+  width: 800;
+  height: 1500;
+
+} */
+.grid_width {
+  width: 100;
+}
+.grid_today {
+  width: 200;
+}
+.first_column {
+  background-color: #efeff4;
+}
+.week_text {
+  font-size: 20;
+  color: #434343;
+}
+.week_row {
+  width: 800;
+  height: 80;
+}
+.grid {
+  border: 1 solid #434343;
 }

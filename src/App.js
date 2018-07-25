@@ -202,25 +202,78 @@ class Header extends Component {
   }
 }
 
-class Table extends Component {
+class Grid extends Component {
   constructor(props) {
     super(props);
   }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return false;
+  }
+
   render() {
     return (
-      <View style={[styles.table]}>
-        <ScrollView
+      <View style={[styles.gird_width, styles.grid]}>
+        <Text>{this.props.data}</Text>
+      </View>
+    );
+  }
+}
+
+var lessons = new Array(7);
+for (let i = 0; i < 7; i++) {
+  lessons[i] = new Array(14);
+}
+
+let createGrid = (value, index) => <Grid key={index} data={value}/>;
+
+class Table extends Component {
+  constructor(props) {
+    super(props);
+    this.weekData = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+    this.state = {
+      horizontalScrollViewEventLog:  false
+    }
+  }
+  weekList = (item, index) => {
+    return (
+      <View style={[styles.gird_width, styles.first_column, styles.center]}>
+        <Text style={[styles.week_text]}>{item}</Text>
+      </View>
+    )
+  }
+  render() {
+    return (
+      <View>
+        <View style={styles.week_row}>
+          <View style={[styles.grid_width, styles.first_column]}></View>
+          <ScrollView
           ref={(scrollView) => {
             this.horizontalScrollView = scrollView;
           }}
           style={{
-            height: 1500,
-            backgroundColor: 'red'
+            height: 80
           }}
           horizontal={true}
+          // onEndReached={() => this.setState({horizontalScrollViewEventLog: true})}
         >
-          
+          {this.weekData.map(this.weekList)}
         </ScrollView>
+        </View>
+        {/* <ScrollView
+          // ref={(scrollView) => {
+          //   this.horizontalScrollView = scrollView;
+          // }}
+          style={{
+            height: 1000
+          }}
+          horizontal={true}
+          // onEndReached={() => this.setState({horizontalScrollViewEventLog: true})}
+        >
+          {lessons.map(column => {
+            column.map(createGrid)
+          })}
+        </ScrollView> */}
       </View>
     )
   }
