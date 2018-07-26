@@ -4,7 +4,7 @@ import Text from "rax-text";
 import styles from "./App.css";
 import Touchable from "rax-touchable";
 import ListView from "rax-listview";
-// import GradeService from "./services/grade";
+// import TableService from "./services/table";
 import Animated from "rax-animated";
 //import BoxButton from "../box-ui/common/button";
 import Button from "rax-button";
@@ -103,6 +103,7 @@ class Dropdown extends Component {
     );
   }
 }
+
 var week = 1;
 
 class Header extends Component {
@@ -150,20 +151,10 @@ class Header extends Component {
             onPress={this.showWeekModal}
             style={[styles.choose_label, styles.center]}
           >
-            <Text style={styles.choose_text}>第{this.state.choosedWeek}周</Text>
-            <Image
-              style={styles.down_triangle}
-              source={require("./assets/triangle_down.png")}
-              resizeMode="cover"
-            />
+            <Text style={styles.choose_text}>第{this.state.choosedWeek}周</Text>          
           </Touchable>
         <View style={styles.dropdown_container}>
-          <Dropdown ref="weekModal">
-            <Image
-              style={styles.up_triangle}
-              source={require("./assets/triangle_up.png")}
-              resizeMode="cover"
-            />
+          <Dropdown ref="weekModal"> 
             <View style={styles.list_container}>
               <ScrollView 
                 ref={scrollView => {
@@ -202,6 +193,8 @@ class Header extends Component {
   }
 }
 
+var day = new Date().getDay() - 1; // 星期
+
 class Grid extends Component {
   constructor(props) {
     super(props);
@@ -213,12 +206,13 @@ class Grid extends Component {
 
   render() {
     return (
-      <View style={[styles.gird_width, styles.grid]}>
-        <Text>{this.props.data}</Text>
+      <View style={day == this.props.key ? [styles.gird_today, styles.grid_height, styles.grid] : [styles.gird_width, styles.grid_height, styles.grid]}>
+        <Text>{this.props.data}哈哈</Text>
       </View>
     );
   }
 }
+
 
 var lessons = new Array(7);
 for (let i = 0; i < 7; i++) {
@@ -227,66 +221,97 @@ for (let i = 0; i < 7; i++) {
 
 let createGrid = (value, index) => <Grid key={index} data={value}/>;
 
+
 class Table extends Component {
   constructor(props) {
     super(props);
     this.weekData = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+    this.order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
     this.state = {
-      horizontalScrollViewEventLog:  false
+      scrollWeek: false
     }
   }
   weekList = (item, index) => {
     return (
-      <View style={[styles.gird_width, styles.first_column, styles.center]}>
+      <View style={day != index ? [styles.grid_width, styles.first_column, styles.center, styles.column]:[styles.grid_today, styles.first_column, styles.center, styles.column]}>
         <Text style={[styles.week_text]}>{item}</Text>
       </View>
     )
   }
+  orderList = (item) => {
+    return(
+      <View style={[styles.column, styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
+        <Text>{item}</Text>
+      </View>
+      )
+  }
+  
   render() {
     return (
-      <View>
+      <View style={[styles.table]}>
         <View style={styles.week_row}>
-          <View style={[styles.grid_width, styles.first_column]}></View>
+          <View style={[styles.grid_width, styles.first_column, styles.grid_height]}></View>
           <ScrollView
           ref={(scrollView) => {
             this.horizontalScrollView = scrollView;
           }}
-          style={{
-            height: 80
-          }}
+          styles={[styles.order_lesson]}
           horizontal={true}
-          // onEndReached={() => this.setState({horizontalScrollViewEventLog: true})}
+            showsHorizontalScrollIndicator={false}
+          onEndReached={() => this.setState({scrollWeek: true})}
         >
           {this.weekData.map(this.weekList)}
         </ScrollView>
         </View>
-        {/* <ScrollView
-          // ref={(scrollView) => {
-          //   this.horizontalScrollView = scrollView;
-          // }}
-          style={{
-            height: 1000
-          }}
+        <View>
+          <ScrollView
+           ref={(scrollView) => {
+             this.horizontalScrollView = scrollView;
+           }}
+             styles={[styles.order_lesson]}
           horizontal={true}
-          // onEndReached={() => this.setState({horizontalScrollViewEventLog: true})}
+            showsHorizontalScrollIndicator={false}
+           //onEndReached={() => this.setState({scrollWeek: true})}
         >
-          {lessons.map(column => {
-            column.map(createGrid)
-          })}
-        </ScrollView> */}
+            <View style={[styles.column] }>
+				{/*{
+              	<ListView style={[styles.column]}
+                  renderRow={this.orderList}
+        			dataSource={this.order}
+                  /> */}
+              
+              {this.order.map(i => {
+            return (
+              <View style={[styles.column, styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
+              <Text>{i}</Text>
+                </View>
+            )})}
+        	 </View>
+            <View style={[styles.lesson_table]}>
+          		{lessons.map(column => {
+            		column.map(createGrid)
+          		})}
+             </View>
+        </ScrollView>
+        </View>
+        
       </View>
     )
   }
 }
+
+
 class App extends Component {
   render() {
     return (
       <View style={styles.app}>
-        <Header></Header>
+        
         <Table></Table>
+        <Header></Header>
       </View>
     );
   }
 }
+
 
 export default App;
