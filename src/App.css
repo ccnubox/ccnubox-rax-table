@@ -17,7 +17,6 @@
 .header {
   height: 90;
   background-color: #f8f8f8;
-  width: 900;
   position: absolute;
   top: 0;
   right: 0;
@@ -45,7 +44,7 @@
 
 .dropdown_container {
   position: absolute;
-  top: 70;
+  top: 90;
   width: 250;
   left: 250;
   display: flex;
@@ -75,7 +74,7 @@
 
 .set_button {
   background-color: #6767fa;
-   color: #ffffff;
+  color: #ffffff;
   width: 200;
   border-radius: 5;
   margin: 10 0;
@@ -114,12 +113,12 @@
   width: 100;
 }
 .grid_height {
-  height: 80;
+  height: 100;
 }
 .grid_today {
   width: 200;
 }
-.first_column {
+.first_row {
   background-color: #efeff4;
 }
 .week_text {
@@ -127,7 +126,7 @@
   color: #434343;
 }
 .week_row {
-  width: 900;
+  width: 750;
   height: 80;
   display: flex;
   flex-direction: row;
@@ -135,31 +134,48 @@
 .grid {
   border-bottom: 1 solid #efeff4;
   border-right: 1 solid #efeff4;
-  height: 100;
+  height: 200;
 }
 
 .table {
-  width: 900;
-  height: 1200;
   background-color: #ffffff;
   position: absolute;
   top: 90;
+  height: 1110;
 }
 .column {
   display: flex;
   flex-direction: column;
+}
+
+.order_grid {
+  border-bottom: 1 solid #E0E0E7;
+  height: 80;
   background-color: #efeff4;
 }
-.order_grid {
-  border-bottom: 1 solid #434343;
-}
+
 .order_lesson {
-  width: 900;
+  height: 1030;
+  width: 750;
   display: flex;
   flex-direction: row;
-  height: 1400;
 }
 .lesson_table {
-  height: 1200;
-  /* background-color: #434343; */
+  background-color: #ffffff;
+  width: 650;
+}
+.order_lesson {
+  width: 750;
+  height: 1030;
+}
+.lesson_grid{
+  display: flex;
+  flex-direction: row;
+}
+.daily_lesson {
+  display: flex;
+  border-bottom: 1 solid #F0F0F1;
+  border-right: 1 solid #F0F0F1;
+  flex-direction: column;
+  height: 200;
 }

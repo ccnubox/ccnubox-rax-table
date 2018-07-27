@@ -194,33 +194,16 @@ class Header extends Component {
 }
 
 var day = new Date().getDay() - 1; // 星期
-
-class Grid extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return false;
-  }
-
-  render() {
-    return (
-      <View style={day == this.props.key ? [styles.gird_today, styles.grid_height, styles.grid] : [styles.gird_width, styles.grid_height, styles.grid]}>
-        <Text>{this.props.data}哈哈</Text>
-      </View>
-    );
-  }
-}
-
-
-var lessons = new Array(7);
-for (let i = 0; i < 7; i++) {
-  lessons[i] = new Array(14);
-}
-
+var lessons = [
+	[1, 2, 3, 4, 5, 6, 7],
+  [1, 2, 3, 4, 5, 6, 7],
+  [1, 2, 3, 4, 5, 6, 7],
+  [1, 2, 3, 4, 5, 6, 7],
+  [1, 2, 3, 4, 5, 6, 7],
+  [1, 2, 3, 4, 5, 6, 7],
+  [1, 2, 3, 4, 5, 6, 7]
+]
 let createGrid = (value, index) => <Grid key={index} data={value}/>;
-
 
 class Table extends Component {
   constructor(props) {
@@ -228,19 +211,20 @@ class Table extends Component {
     this.weekData = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
     this.order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
     this.state = {
-      scrollWeek: false
+      horizontalScrollViewEventLog: false
     }
   }
+
   weekList = (item, index) => {
     return (
-      <View style={day != index ? [styles.grid_width, styles.first_column, styles.center, styles.column]:[styles.grid_today, styles.first_column, styles.center, styles.column]}>
+      <View style={day != index ? [styles.grid_width, styles.first_row, styles.center, styles.column]:[styles.grid_today, styles.first_row, styles.center, styles.column]}>
         <Text style={[styles.week_text]}>{item}</Text>
       </View>
     )
-  }
+  };
   orderList = (item) => {
     return(
-      <View style={[styles.column, styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
+      <View style={[styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
         <Text>{item}</Text>
       </View>
       )
@@ -250,56 +234,64 @@ class Table extends Component {
     return (
       <View style={[styles.table]}>
         <View style={styles.week_row}>
-          <View style={[styles.grid_width, styles.first_column, styles.grid_height]}></View>
+          <View style={[styles.grid_width, styles.first_row, styles.grid_height]}></View>
           <ScrollView
           ref={(scrollView) => {
             this.horizontalScrollView = scrollView;
           }}
-          styles={[styles.order_lesson]}
+          style={[styles.week_row]}
           horizontal={true}
-            showsHorizontalScrollIndicator={false}
-          onEndReached={() => this.setState({scrollWeek: true})}
+          showsHorizontalScrollIndicator={false}
+            
         >
           {this.weekData.map(this.weekList)}
         </ScrollView>
         </View>
-        <View>
           <ScrollView
-           ref={(scrollView) => {
-             this.horizontalScrollView = scrollView;
+           ref={(scrollLesson) => {
+             this.horizontalScrollView = scrollLesson;
            }}
-             styles={[styles.order_lesson]}
-          horizontal={true}
+             style={[styles.lesson_table]}
+          	horizontal={true}
             showsHorizontalScrollIndicator={false}
-           //onEndReached={() => this.setState({scrollWeek: true})}
-        >
-            <View style={[styles.column] }>
-				{/*{
-              	<ListView style={[styles.column]}
-                  renderRow={this.orderList}
-        			dataSource={this.order}
-                  /> */}
-              
+            onScroll={()=> this.ScrollLesson}
+             // onEndReached={() => this.setState({horizontalScrollViewEventLog: true})}
+        	>
+            
+            <View style={[styles.column, styles.grid_width] }>
               {this.order.map(i => {
-            return (
-              <View style={[styles.column, styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
-              <Text>{i}</Text>
-                </View>
+            	return (
+              		<View style={[styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
+              			<Text>{i}</Text>
+                	</View>
             )})}
         	 </View>
+            
+            {/*<ListView style={[styles.column, styles.grid_width]}
+                  renderRow={this.orderList}
+        			dataSource={this.order}
+                  />*/}
             <View style={[styles.lesson_table]}>
-          		{lessons.map(column => {
-            		column.map(createGrid)
+              {lessons.map(column => {
+            		return (
+                    <View style={[styles.lesson_grid, styles.grid_width]}>
+                        {column.map((item, index) => {
+                          return(
+                            <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
+                              <Text>{item}</Text>
+                              </View>
+                          )
+                        	})
+                  		}
+                      </View>
+                    )
           		})}
              </View>
         </ScrollView>
-        </View>
-        
       </View>
     )
   }
 }
-
 
 class App extends Component {
   render() {
@@ -312,6 +304,5 @@ class App extends Component {
     );
   }
 }
-
 
 export default App;
