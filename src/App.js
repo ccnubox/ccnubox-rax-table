@@ -203,7 +203,15 @@ var lessons = [
   [1, 2, 3, 4, 5, 6, 7],
   [1, 2, 3, 4, 5, 6, 7]
 ]
-let createGrid = (value, index) => <Grid key={index} data={value}/>;
+var lessons2 = [
+	[1, 1, 2, 3, 4, 5, 6, 7],
+  [2, 1, 2, 3, 4, 5, 6, 7],
+  [3, 1, 2, 3, 4, 5, 6, 7],
+  [4, 1, 2, 3, 4, 5, 6, 7],
+  [5, 1, 2, 3, 4, 5, 6, 7],
+  [6, 1, 2, 3, 4, 5, 6, 7],
+  [7, 1, 2, 3, 4, 5, 6, 7]
+]
 
 class Table extends Component {
   constructor(props) {
@@ -228,6 +236,26 @@ class Table extends Component {
         <Text>{item}</Text>
       </View>
       )
+  };
+  lessonList = (row) => {
+    return (
+      <View style={[styles.lesson_grid]}>
+        {row.map((item, index) => {
+      		if (index == 0) {
+      			return (
+        			<View style={[styles.cont, styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
+        				<Text>{item}</Text>
+      				</View>)
+    		} else {
+      			return(
+        			<View style={[styles.daily_lesson, styles.grid_today]}>
+            			<Text>{item}</Text>
+        			</View>)
+    		}
+    })}
+      </View>
+         )
+    
   }
   
   render() {
@@ -287,6 +315,10 @@ class Table extends Component {
                     )
           		})}
              </View>
+             {/* <ListView 
+                  renderRow={this.lessonList}
+        			dataSource={lessons2}
+                  /> */}
         </ScrollView>
       </View>
     )
