@@ -10,6 +10,7 @@ import Animated from "rax-animated";
 import Button from "rax-button";
 import Image from "rax-image";
 import ScrollView from "rax-scrollview";
+import PanResponder from 'universal-panresponder';
 
 const { View: AnimatedView } = Animated;
 
@@ -195,22 +196,13 @@ class Header extends Component {
 
 var day = new Date().getDay() - 1; // 星期
 var lessons = [
-	[1, 2, 3, 4, 5, 6, 7],
-  [1, 2, 3, 4, 5, 6, 7],
+	[ 1, 2, 3, 4, 5, 6, 7],
+  [ 1, 2, 3, 4, 5, 6, 7],
   [1, 2, 3, 4, 5, 6, 7],
   [1, 2, 3, 4, 5, 6, 7],
   [1, 2, 3, 4, 5, 6, 7],
   [1, 2, 3, 4, 5, 6, 7],
   [1, 2, 3, 4, 5, 6, 7]
-]
-var lessons2 = [
-	[1, 1, 2, 3, 4, 5, 6, 7],
-  [2, 1, 2, 3, 4, 5, 6, 7],
-  [3, 1, 2, 3, 4, 5, 6, 7],
-  [4, 1, 2, 3, 4, 5, 6, 7],
-  [5, 1, 2, 3, 4, 5, 6, 7],
-  [6, 1, 2, 3, 4, 5, 6, 7],
-  [7, 1, 2, 3, 4, 5, 6, 7]
 ]
 
 class Table extends Component {
@@ -222,10 +214,63 @@ class Table extends Component {
       horizontalScrollViewEventLog: false
     }
   }
+  
+  componentWillMount () {
+    this._panResponder = PanResponder.create({
+      onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
+      onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
+      onPanResponderGrant: this._handlePanResponderGrant,
+      onPanResponderMove: this._handlePanResponderMove,
+      onPanResponderRelease: this._handlePanResponderEnd,
+      onPanResponderTerminate: this._handlePanResponderEnd,
+    });
+    this._previousLeft = 100;
+    this._previousTop = 170;
+    this._tableStyles = {
+      style: {
+        left: this._previousLeft,
+        top: this._previousTop
+      }
+    };
+  }
+
+  componentDidMount () {
+    this._updatePosition();
+  };
+  
+  _updatePosition () {
+    if (this.table && this.table.setNativeProps) {
+      this.table.setNativeProps(this._tableStyles);
+    }
+  }
+
+  _handleStartShouldSetPanResponder (e, gestureState) {
+    // Should we become active when the user presses down on the circle?
+    return true;
+  }
+
+  _handleMoveShouldSetPanResponder (e, gestureState) {
+    // Should we become active when the user moves a touch over the circle?
+    return true;
+  }
+
+  _handlePanResponderGrant = (e, gestureState) => this._highlight();
+
+
+  _handlePanResponderMove = (e, gestureState) => {
+    this._tableStyles.style.left = this._previousLeft + gestureState.dx;
+    this._tableStyles.style.top = this._previousTop + gestureState.dy;
+    this._updatePosition();
+  };
+
+  _handlePanResponderEnd = (e, gestureState) => {
+   	this._previousLeft += gestureState.dx;
+    this._previousTop += gestureState.dy;
+  };
 
   weekList = (item, index) => {
     return (
-      <View style={day != index ? [styles.grid_width, styles.first_row, styles.center, styles.column]:[styles.grid_today, styles.first_row, styles.center, styles.column]}>
+      <View style={day != index ? [styles.grid_width, styles.first_row, styles.center]:[styles.grid_today, styles.first_row, styles.center]}>
         <Text style={[styles.week_text]}>{item}</Text>
       </View>
     )
@@ -237,55 +282,24 @@ class Table extends Component {
       </View>
       )
   };
-  lessonList = (row) => {
-    return (
-      <View style={[styles.lesson_grid]}>
-        {row.map((item, index) => {
-      		if (index == 0) {
-      			return (
-        			<View style={[styles.cont, styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
-        				<Text>{item}</Text>
-      				</View>)
-    		} else {
-      			return(
-        			<View style={[styles.daily_lesson, styles.grid_today]}>
-            			<Text>{item}</Text>
-        			</View>)
-    		}
-    })}
-      </View>
-         )
-    
-  }
   
   render() {
     return (
-      <View style={[styles.table]}>
-        <View style={styles.week_row}>
-          <View style={[styles.grid_width, styles.first_row, styles.grid_height]}></View>
+      <View>
+        <View style={[styles.week_row, styles.first_row]}>
+          <View style={[styles.grid_width]}></View>
           <ScrollView
           ref={(scrollView) => {
             this.horizontalScrollView = scrollView;
           }}
-          style={[styles.week_row]}
+          style={[styles.week_data]}
           horizontal={true}
           showsHorizontalScrollIndicator={false}
-            
         >
           {this.weekData.map(this.weekList)}
         </ScrollView>
         </View>
-          <ScrollView
-           ref={(scrollLesson) => {
-             this.horizontalScrollView = scrollLesson;
-           }}
-             style={[styles.lesson_table]}
-          	horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            onScroll={()=> this.ScrollLesson}
-             // onEndReached={() => this.setState({horizontalScrollViewEventLog: true})}
-        	>
-            
+          <View>
             <View style={[styles.column, styles.grid_width] }>
               {this.order.map(i => {
             	return (
@@ -294,12 +308,12 @@ class Table extends Component {
                 	</View>
             )})}
         	 </View>
-            
-            {/*<ListView style={[styles.column, styles.grid_width]}
-                  renderRow={this.orderList}
-        			dataSource={this.order}
-                  />*/}
-            <View style={[styles.lesson_table]}>
+            <View style={[styles.lesson_table]}
+              ref={(table) => {
+            	this.table = table;
+          	}}
+          	{...this._panResponder.panHandlers}
+             >
               {lessons.map(column => {
             		return (
                     <View style={[styles.lesson_grid, styles.grid_width]}>
@@ -315,16 +329,11 @@ class Table extends Component {
                     )
           		})}
              </View>
-             {/* <ListView 
-                  renderRow={this.lessonList}
-        			dataSource={lessons2}
-                  /> */}
-        </ScrollView>
+        </View>
       </View>
     )
   }
 }
-
 class App extends Component {
   render() {
     return (
