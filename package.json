@@ -18,7 +18,8 @@
     "rax-scrollview": "^0.6.0",
     "rax-text": "^0.5.4",
     "rax-touchable": "^0.5.4",
-    "rax-view": "^0.5.4"
+    "rax-view": "^0.5.4",
+    "universal-panresponder": "^0.6.4"
   },
   "devDependencies": {
     "rax-scripts": "^0.5.4",

@@ -59,16 +59,15 @@
 }
 
 .list_container {
-  z-index: 100;
   border-radius: 20;
   width: 250;
   border-left: 1 solid #efeff4;
   border-bottom: 1 solid #efeff4;
   border-right: 1 solid #efeff4;
-  /* padding-bottom: 10;*/
+  flex-direction: center;
 }
 
-.option_text {
+.option_text, .week_text, .daily_lesson {
   color: #434343;
 }
 
@@ -120,12 +119,12 @@
 }
 .first_row {
   height: 80;
-  /*background-color: #efeff4;*/
+  background-color: #efeff4;
 }
 .week_text {
   font-size: 20;
-  color: #434343;
 }
+
 .week_row {
   width: 750;
   display: flex;
@@ -148,7 +147,6 @@
   display: flex;
   flex-direction: column;
   position: absolute;
-  top: 170;
   left: 0;
 }
 
@@ -159,11 +157,8 @@
 }
 
 .lesson_table {
-  background-color: #ffffff;
   width: 650;
   position: absolute;
-  top: 170;
-  left: 100;
 }
 
 .lesson_grid{
@@ -176,4 +171,5 @@
   border-right: 1 solid #F0F0F1;
   flex-direction: column;
   height: 200;
+  background-color: #ffffff;
 }
