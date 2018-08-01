@@ -4,13 +4,13 @@ import Text from "rax-text";
 import styles from "./App.css";
 import Touchable from "rax-touchable";
 import ListView from "rax-listview";
-// import TableService from "./services/table";
 import Animated from "rax-animated";
 //import BoxButton from "../box-ui/common/button";
 import Button from "rax-button";
 import Image from "rax-image";
 import ScrollView from "rax-scrollview";
 import PanResponder from 'universal-panresponder';
+import TableService from './services/table';
 
 const { View: AnimatedView } = Animated;
 
@@ -216,19 +216,43 @@ var lessons = [
   [1, 2, 3, 4, 5, 6, 7],
   [1, 2, 3, 4, 5, 6, 7]
 ]
-
 class Table extends Component {
   constructor(props) {
     super(props);
     this.weekData = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
     this.order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+    this.weekDay = {
+      "星期一": 0,
+      "星期二": 1,
+      "星期三": 2,
+      "星期四": 3,
+      "星期五": 4,
+      "星期六": 5,
+      "星期日": 6
+    }
     this.state = {
       left: 100,
-      top: 170
+      top: 170,
+      lessons: []
     }
   }
   
   componentWillMount () {
+    let arr = new Array(7);
+    for (let i = 0; i < 7; i++) {
+      arr[i] = new Array(7);
+    }
+    
+    TableService.getTableList().then(respond => {
+      respond.map(lesson => {
+        let day = lesson.day;
+        let index = (parseInt(lesson.start) - 1 ) / 2;
+        arr[index][this.weekDay.day].push(lesson)
+      })
+      this.setState({
+        lessons: arr
+      })
+    })
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -316,24 +340,34 @@ class Table extends Component {
   render() {
     return (
       <View>
+         <View><Text>{this.state.lessons}</Text></View>
         <View style={[styles.lesson_table, {
             top: this.state.top,
             left: this.state.left
           }]}
           ref={(table) => {
             this.table = table;
-          }}
+          }} 
           {...this._panResponder.panHandlers}
         >
           {lessons.map(column => {
             return (
               <View style={[styles.lesson_grid, styles.grid_width]}>
                 {column.map((item, index) => {
-                  return(
-                    <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
-                      <Text>{item}</Text>
-                    </View>
-                  )
+                  if (item !== null || item !== undefined) {
+                    return(
+                      <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
+                        <Text>{item}</Text>
+                      </View>
+                    )
+                  } else {
+                    return (
+                      <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
+                        
+                      </View>
+                    )
+                  }
+                  
                 })}
               </View>
             )

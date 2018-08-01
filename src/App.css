@@ -64,7 +64,6 @@
   border-left: 1 solid #efeff4;
   border-bottom: 1 solid #efeff4;
   border-right: 1 solid #efeff4;
-  flex-direction: center;
 }
 
 .option_text, .week_text, .daily_lesson {
