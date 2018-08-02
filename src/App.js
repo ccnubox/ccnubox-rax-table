@@ -379,7 +379,8 @@ class Table extends Component {
     this.state = {
       left: 100,
       top: 170,
-      lessons: []
+      lessons: [],
+      course: {}
     }
   }
   
@@ -478,7 +479,10 @@ class Table extends Component {
       </View>
       )
   };
-  showLesson = () => {
+  showLesson = (item) => {
+    this.setState({
+      course: item
+    })
     this.refs.lesson.show();
   };
 
@@ -505,26 +509,28 @@ class Table extends Component {
                    if (item.course != null || item.course != undefined) {
                     return (
                       <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
-                        <View style={[styles.item_center]}>
-                        <Touchable onPress={this.showLesson}>
-                          <View style={[styles.course_grid, styles.item_center]}>
-                            <View style={[styles.lesson_item, {
+                        <View style={styles.item_center}>
+                        <View onClick = {() => {this.showLesson(item)}} style={styles.item_center}>
+                          {/* <View style={[styles.course_grid, styles.item_center]}> */}
+                            <View style={[styles.item_center, styles.lesson_item, {
                                 backgroundColor: this.colors[parseInt(item.color)],
                                 width: index == day ? 188 : 88
                               }]}>
                               <Text style={[styles.course_text, styles.font]}>{item.course}</Text>
                             </View>
-                              <Text style={[styles.font]}>{item.teacher}</Text>
-                              <Text style={[styles.font]}>@{item.place}</Text>
-                          </View>
-                        </Touchable>
+                              <Text style={[styles.font, styles.item_center]}>{item.teacher}</Text>
+                              <Text style={[styles.font, styles.item_center]}>@{item.place}</Text>
+                          {/* </View> */}
                         </View>
-                        <Modal ref="lesson">
+                        </View>
+                        <Modal ref="lesson" contentStyle={styles.lesson_modal}>
                           <Touchable onPress={this.hideLesson}>
-                            <View style={[styles.lesson_modal, styles.item_center]}>
-                              <Text>{item.course}</Text>
-                              <Text>{item.teacher}</Text>
-                              <Text>{item.place}</Text>
+                            <View style={[styles.item_center]}>
+                              <Text style={[styles.modal_font, styles.modal_course, {
+                                color: this.colors[item.color]
+                              }]}>{this.state.course.course}</Text>
+                              <Text style={[styles.modal_font]}>{this.state.course.teacher}</Text>
+                              <Text style={[styles.modal_font]}>@{this.state.course.place}</Text>
                             </View>
                           </Touchable>
                         </Modal>
