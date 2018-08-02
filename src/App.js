@@ -11,6 +11,7 @@ import Image from "rax-image";
 import ScrollView from "rax-scrollview";
 import PanResponder from 'universal-panresponder';
 import TableService from './services/table';
+import Modal from 'rax-modal';
 
 const { View: AnimatedView } = Animated;
 
@@ -216,6 +217,150 @@ var lessons = [
   [1, 2, 3, 4, 5, 6, 7],
   [1, 2, 3, 4, 5, 6, 7]
 ]
+var arr = new Array(7);
+for (let i = 0; i < 7; i++) {
+  arr[i] = new Array(7);
+}
+for (let i = 0; i < 7; i++) {
+  for (let j = 0; j < 7; j++) {
+    arr[i][j] = {}
+  }
+}
+
+let res = [
+  {
+      "course": "编译原理",
+      "teacher": "杨青",
+      "weeks": "3,5,7,9,11,13,15,17,19",
+      "day": "星期一",
+      "start": 3,
+      "during": 2,
+      "place": "本校9501",
+      "remind": false,
+      "id": "1",
+      "color": 0
+  },
+  {
+      "course": "专业英语",
+      "teacher": "朱瑄",
+      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+      "day": "星期二",
+      "start": 3,
+      "during": 2,
+      "place": "本校9501",
+      "remind": false,
+      "id": "2",
+      "color": 1
+  },
+  {
+      "course": "操作系统原理",
+      "teacher": "朱瑄",
+      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+      "day": "星期二",
+      "start": 7,
+      "during": 2,
+      "place": "本校6205",
+      "remind": false,
+      "id": "3",
+      "color": 2
+  },
+  {
+      "course": "人工智能",
+      "teacher": "郭京蕾",
+      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+      "day": "星期二",
+      "start": 9,
+      "during": 2,
+      "place": "本校9-12",
+      "remind": false,
+      "id": "4",
+      "color": 3
+  },
+  {
+      "course": "设计模式",
+      "teacher": "外聘1",
+      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+      "day": "星期三",
+      "start": 7,
+      "during": 2,
+      "place": "本校JKSYS2",
+      "remind": false,
+      "id": "5",
+      "color": 0
+  },
+  {
+      "course": "软件工程导论",
+      "teacher": "外聘1",
+      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+      "day": "星期四",
+      "start": 1,
+      "during": 2,
+      "place": "本校6205",
+      "remind": false,
+      "id": "6",
+      "color": 1
+  },
+  {
+      "course": "操作系统原理",
+      "teacher": "朱瑄",
+      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+      "day": "星期四",
+      "start": 3,
+      "during": 2,
+      "place": "本校6205",
+      "remind": false,
+      "id": "7",
+      "color": 2
+  },
+  {
+      "course": "数据库课程设计",
+      "teacher": "罗昌银",
+      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+      "day": "星期四",
+      "start": 7,
+      "during": 2,
+      "place": "本校JKSYS2",
+      "remind": false,
+      "id": "8",
+      "color": 3
+  },
+  {
+      "course": "软件项目管理",
+      "teacher": "李蓉",
+      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+      "day": "星期四",
+      "start": 9,
+      "during": 2,
+      "place": "本校9-12",
+      "remind": false,
+      "id": "9",
+      "color": 0
+  },
+  {
+      "course": "编译原理",
+      "teacher": "杨青",
+      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
+      "day": "星期五",
+      "start": 1,
+      "during": 2,
+      "place": "本校9501",
+      "remind": false,
+      "id": "10",
+      "color": 1
+  }
+]
+
+arr[1][0] = res[0];
+arr[1][1] = res[1];
+arr[3][1] = res[2];
+arr[4][1] = res[3];
+arr[3][2] = res[4];
+arr[0][3] = res[5];
+arr[1][3] = res[6];
+arr[3][3] = res[7];
+arr[4][3] = res[8];
+arr[0][4] = res[9];
+
 class Table extends Component {
   constructor(props) {
     super(props);
@@ -229,7 +374,8 @@ class Table extends Component {
       "星期五": 4,
       "星期六": 5,
       "星期日": 6
-    }
+    },
+    this.colors = ['#f6b37f', '#f29c9f', '#13b5b1', '#8372D3'],
     this.state = {
       left: 100,
       top: 170,
@@ -238,21 +384,17 @@ class Table extends Component {
   }
   
   componentWillMount () {
-    let arr = new Array(7);
-    for (let i = 0; i < 7; i++) {
-      arr[i] = new Array(7);
-    }
+    // TableService.getTableList().then((res) => {
+    //   res.map(lesson => {
+        //   let day = lesson.day;
+        //   let index = (parseInt(lesson.start) - 1 ) / 2;
+        //   arr[index][parseInt(weekDay.day)] = lesson
+        // })
+    // })
     
-    TableService.getTableList().then(respond => {
-      respond.map(lesson => {
-        let day = lesson.day;
-        let index = (parseInt(lesson.start) - 1 ) / 2;
-        arr[index][this.weekDay.day].push(lesson)
-      })
-      this.setState({
-        lessons: arr
-      })
-    })
+    // this.setState({
+    //   lessons: arr
+    // })
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -336,11 +478,17 @@ class Table extends Component {
       </View>
       )
   };
+  showLesson = () => {
+    this.refs.lesson.show();
+  };
+
+  hideLesson = () => {
+    this.refs.lesson.hide();
+  };
   
   render() {
     return (
       <View>
-         <View><Text>{this.state.lessons}</Text></View>
         <View style={[styles.lesson_table, {
             top: this.state.top,
             left: this.state.left
@@ -350,24 +498,44 @@ class Table extends Component {
           }} 
           {...this._panResponder.panHandlers}
         >
-          {lessons.map(column => {
+          {arr.map(column => {
             return (
               <View style={[styles.lesson_grid, styles.grid_width]}>
                 {column.map((item, index) => {
-                  if (item !== null || item !== undefined) {
-                    return(
-                      <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
-                        <Text>{item}</Text>
-                      </View>
-                    )
-                  } else {
+                   if (item.course != null || item.course != undefined) {
                     return (
                       <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
-                        
+                        <View style={[styles.item_center]}>
+                        <Touchable onPress={this.showLesson}>
+                          <View style={[styles.course_grid, styles.item_center]}>
+                            <View style={[styles.lesson_item, {
+                                backgroundColor: this.colors[parseInt(item.color)],
+                                width: index == day ? 188 : 88
+                              }]}>
+                              <Text style={[styles.course_text, styles.font]}>{item.course}</Text>
+                            </View>
+                              <Text style={[styles.font]}>{item.teacher}</Text>
+                              <Text style={[styles.font]}>@{item.place}</Text>
+                          </View>
+                        </Touchable>
+                        </View>
+                        <Modal ref="lesson">
+                          <Touchable onPress={this.hideLesson}>
+                            <View style={[styles.lesson_modal, styles.item_center]}>
+                              <Text>{item.course}</Text>
+                              <Text>{item.teacher}</Text>
+                              <Text>{item.place}</Text>
+                            </View>
+                          </Touchable>
+                        </Modal>
                       </View>
                     )
+                  } 
+                  else {
+                    return (
+                      <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}></View>
+                    )
                   }
-                  
                 })}
               </View>
             )
