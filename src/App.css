@@ -151,49 +151,60 @@
 
 .order_grid {
   border-bottom: 1 solid #E0E0E7;
-  height: 80;
   background-color: #efeff4;
+}
+
+.order_width {
+  width: 80;
 }
 
 .lesson_table {
   width: 650;
   position: absolute;
+  flex-direction: row;
+  display: flex;
 }
 
-.lesson_grid{
+.lesson_column{
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
 }
 .daily_lesson {
   display: flex;
-  border-bottom: 1 solid #F0F0F1;
   border-right: 1 solid #F0F0F1;
   flex-direction: column;
-  height: 200;
   background-color: #ffffff;
   align-items: center;
+  height: 100;
+}
+.grid_border {
+  height: 100;
+}
+.grid_border, .daily_lesson {
+  border-bottom: 1 solid #F0F0F1;
 }
 
 .lesson_item {
   border-radius: 12;
   width: 88;
-  padding: 30 0;
-}
-
-.grey {
-  background-color: #8E8E93;
+  padding: 10 0;
 }
 
 .lesson_modal {
   width: 300;
   height: 150;
   border-radius: 12;
+  position: absolute;
+  left: 225;
+  top: 170;
 }
 .course_text {
   color: #ffffff;
 }
 .item_center {
   align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
 .font {
   font-size: 16;
@@ -203,4 +214,21 @@
 }
 .modal_course {
   margin: 20 0;
+}
+.current {
+  color: #f6b37f;
+}
+.header_refresh {
+  position: absolute;
+  top: 20;
+  left: 50;
+}
+.fresh_text {
+  color: #8372D3;
+  font-size: 30;
+}
+.add {
+  position: absolute;
+  top: 20;
+  right: 50;
 }

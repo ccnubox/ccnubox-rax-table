@@ -5,13 +5,13 @@ import styles from "./App.css";
 import Touchable from "rax-touchable";
 import ListView from "rax-listview";
 import Animated from "rax-animated";
-//import BoxButton from "../box-ui/common/button";
 import Button from "rax-button";
 import Image from "rax-image";
 import ScrollView from "rax-scrollview";
 import PanResponder from 'universal-panresponder';
 import TableService from './services/table';
 import Modal from 'rax-modal';
+import Link from 'rax-link';
 
 const { View: AnimatedView } = Animated;
 
@@ -106,17 +106,18 @@ class Dropdown extends Component {
   }
 }
 
-var week = 1;
+ var initWeek = 1;
 
 class Header extends Component {
   constructor(props) {
     super(props);
     this.WeekOptions =  ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九","二十"];
     this.state = {
-      currentWeek: week, // 当前周
-      choosedWeek: week, // 设为当前周
+      currentWeek: initWeek, // 当前周
+      choosedWeek: initWeek, // 设为当前周
       showsVerticalScrollIndicator: false,
-      isShow: false
+      isShow: false,
+      confirm: false
     };
   }
 
@@ -133,22 +134,33 @@ class Header extends Component {
   };
 
   hideWeekModal = () => {
+    this.refs.weekModal.hide();
+  };
+
+  confirmChange = () => {
     this.setState({
-      currentWeek: this.state.choosedWeek
+      currentWeek: this.state.choosedWeek,
+      confirm: true
     });
+    this.props.changeWeek(this.state.currentWeek);
     this.refs.weekModal.hide();
   };
   
   choosingWeek = (index) => {
     this.setState({
-      choosedWeek: index + 1
+      choosedWeek: index + 1,
+      confirm: false
     });
-  }
+    this.props.changeWeek(this.state.choosedWeek);
+  };
 
   render() {
     return (
       <View>
         <View style={[styles.header, styles.center]}>
+        <Touchable onPress={this.refresh}  style={styles.header_refresh}>
+          <Text style={[styles.fresh_text]}>刷新课表</Text>
+        </Touchable>
           <Touchable
             onPress={this.showWeekModal}
             style={[styles.choose_label, styles.center]}
@@ -186,37 +198,51 @@ class Header extends Component {
                         <Text style={styles.option_text}>
                         第{this.WeekOptions[index]}周
                         </Text>
-                        {/* rax 中无 display: none */}
-                          {/* <Text style={this.state.currentWeek == index + 1 ? styles.current : styles.not_display}>当前</Text> */}
+                          {this.state.currentWeek == index + 1 &&  <Text style={[styles.font, styles.current]}>当前</Text>}
                       </View>
                     </View>
                   )
                 })}
               </ScrollView>
               <View style={styles.center}>
-                <Button onPress={() => this.hideWeekModal()} style={[styles.set_button, styles.center]}>
+                <Button onPress={() => this.confirmChange()} style={[styles.set_button, styles.center]}>
                   <Text style={[styles.button_text]}>设为当前周</Text>
                 </Button>
               </View>
             </View>
             </Dropdown>
           </View>
+          <View style={styles.add}>
+            <Link
+              href="http://192.168.1.16:9999/js/second.bundle.js?_wx_tpl=http://192.168.1.16:9999/js/second.bundle.js"
+              style={[styles.fresh_text]}
+            >
+            添课
+            </Link>
+          </View> 
         </View>
       </View>
     );
   }
 }
 
-var day = new Date().getDay() - 1; // 星期
-var lessons = [
-	[ 1, 2, 3, 4, 5, 6, 7],
-  [ 1, 2, 3, 4, 5, 6, 7],
-  [1, 2, 3, 4, 5, 6, 7],
-  [1, 2, 3, 4, 5, 6, 7],
-  [1, 2, 3, 4, 5, 6, 7],
-  [1, 2, 3, 4, 5, 6, 7],
-  [1, 2, 3, 4, 5, 6, 7]
-]
+var day = new Date().getDay() - 1; // 本周的第几天
+var d = day;
+var weekDate = [];
+var nowDate = new Date();
+if (d < 1) {
+    d = 7;
+}
+var temp = nowDate;
+for (let i = 0; i < 7; i++) {
+  if (i == 0) {
+      temp.setDate(temp.getDate() - d);
+  } else {
+      temp.setDate(temp.getDate() + 1);
+  }
+  weekDate[i] = (temp.getMonth() + 1) + "-" + temp.getDate();
+}
+
 var arr = new Array(7);
 for (let i = 0; i < 7; i++) {
   arr[i] = new Array(7);
@@ -350,16 +376,15 @@ let res = [
   }
 ]
 
-arr[1][0] = res[0];
-arr[1][1] = res[1];
-arr[3][1] = res[2];
-arr[4][1] = res[3];
-arr[3][2] = res[4];
-arr[0][3] = res[5];
-arr[1][3] = res[6];
-arr[3][3] = res[7];
-arr[4][3] = res[8];
-arr[0][4] = res[9];
+var lessons = [
+	[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+]
 
 class Table extends Component {
   constructor(props) {
@@ -376,6 +401,7 @@ class Table extends Component {
       "星期日": 6
     },
     this.colors = ['#f6b37f', '#f29c9f', '#13b5b1', '#8372D3'],
+    this.grey = '#8E8E93',
     this.state = {
       left: 100,
       top: 170,
@@ -404,7 +430,7 @@ class Table extends Component {
       onPanResponderRelease: this._handlePanResponderEnd,
       onPanResponderTerminate: this._handlePanResponderEnd,
     });
-    this._previousLeft = 100;
+    this._previousLeft = 80;
     this._previousTop = 170;
     this._tableStyles = {
       style: {
@@ -421,13 +447,13 @@ class Table extends Component {
   
   _updateLeft() {
     let LeftTemp = this._tableStyles.style.left;
-    if (LeftTemp > 100) {LeftTemp = 100;} 
+    if (LeftTemp > 80) {LeftTemp = 80;} 
     if (LeftTemp < -50) {LeftTemp = -50;}
     
     this.setState({
       left: LeftTemp
     });
-    this.scrollView.scrollTo({x: 100 - LeftTemp})
+    this.scrollView.scrollTo({x: 80 - LeftTemp})
   };
   
   _updateTop() {
@@ -467,14 +493,15 @@ class Table extends Component {
 
   weekList = (item, index) => {
     return (
-      <View style={day != index ? [styles.grid_width, styles.first_row, styles.center]:[styles.grid_today, styles.first_row, styles.center]}>
+      <View style={day != index ? [styles.grid_width, styles.first_row, styles.item_center]:[styles.grid_today, styles.first_row, styles.item_center]}>
         <Text style={[styles.week_text]}>{item}</Text>
+        <Text style={[styles.font, {color: this.colors[0]}]}>{weekDate[index]}</Text>
       </View>
     )
   };
   orderList = (item) => {
     return(
-      <View style={[styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
+      <View style={[styles.order_grid, styles.order_width, styles.grid_height, styles.center]}>
         <Text>{item}</Text>
       </View>
       )
@@ -489,7 +516,16 @@ class Table extends Component {
   hideLesson = () => {
     this.refs.lesson.hide();
   };
-  
+
+  inArray = (s, week) => {
+    let arr = [];
+    arr = s.split(',');
+    if (arr.indexOf(week.toString()) != -1) {
+      return true
+    }
+    return false;
+  };
+
   render() {
     return (
       <View>
@@ -502,32 +538,34 @@ class Table extends Component {
           }} 
           {...this._panResponder.panHandlers}
         >
-          {arr.map(column => {
+          {lessons.map((column, index) => {
             return (
-              <View style={[styles.lesson_grid, styles.grid_width]}>
+              <View style={day == index ?  [styles.lesson_column, styles.grid_today] : [styles.lesson_column, styles.grid_width]}>
                 {column.map((item, index) => {
+                  return(
+                    <View style={[styles.daily_lesson]}>
+                      <Text>{item}</Text>
+                      </View>
+                  )
+                  {/*
                    if (item.course != null || item.course != undefined) {
                     return (
-                      <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
-                        <View style={styles.item_center}>
+                      <View style={index == day ? [styles.item_center, styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width, styles.item_center]}>
                         <View onClick = {() => {this.showLesson(item)}} style={styles.item_center}>
-                          {/* <View style={[styles.course_grid, styles.item_center]}> */}
                             <View style={[styles.item_center, styles.lesson_item, {
-                                backgroundColor: this.colors[parseInt(item.color)],
+                                backgroundColor:  this.inArray(item.weeks, this.props.currentWeek) ? this.colors[parseInt(item.color)] : this.grey,
                                 width: index == day ? 188 : 88
                               }]}>
                               <Text style={[styles.course_text, styles.font]}>{item.course}</Text>
                             </View>
-                              <Text style={[styles.font, styles.item_center]}>{item.teacher}</Text>
-                              <Text style={[styles.font, styles.item_center]}>@{item.place}</Text>
-                          {/* </View> */}
-                        </View>
+                              <Text style={[styles.font]}>{item.teacher}</Text>
+                              <Text style={[styles.font]}>@{item.place}</Text>
                         </View>
                         <Modal ref="lesson" contentStyle={styles.lesson_modal}>
                           <Touchable onPress={this.hideLesson}>
                             <View style={[styles.item_center]}>
                               <Text style={[styles.modal_font, styles.modal_course, {
-                                color: this.colors[item.color]
+                                color: this.colors[this.state.course.color]
                               }]}>{this.state.course.course}</Text>
                               <Text style={[styles.modal_font]}>{this.state.course.teacher}</Text>
                               <Text style={[styles.modal_font]}>@{this.state.course.place}</Text>
@@ -539,26 +577,34 @@ class Table extends Component {
                   } 
                   else {
                     return (
-                      <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}></View>
+                      <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
+                      <View style={[styles.grid_border, {
+                        width: index == day ? 200 : 100
+                      }]}>
+                      <Text>{item}</Text>
+                      </View>
+                      </View>
                     )
-                  }
-                })}
-              </View>
+                  }*/}
+                }
+              )
+            }
+            </View>
             )
           })}
-          </View>
+        </View>
         <View style={[styles.column, styles.grid_width,{
                 top: this.state.top
               }] }>
           {this.order.map(i => {
             return (
-              <View style={[styles.order_grid,styles.grid_width,styles.grid_height, styles.center]}>
+              <View style={[styles.order_grid,styles.order_width,styles.grid_height, styles.center]}>
               	<Text>{i}</Text>
               </View>
             )})}
         </View>
         <View style={[styles.week_row, styles.first_row]}>
-          <View style={[styles.grid_width, styles.first_row]}></View>
+          <View style={[styles.order_width, styles.first_row]}></View>
           	<ScrollView
           		ref={(scrollView) => {
             		this.scrollView = scrollView;
@@ -576,11 +622,23 @@ class Table extends Component {
 }
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentWeek: 1
+    }
+  }
+  changeWeektoTable = (week) => {
+    this.setState({
+      currentWeek: week
+    })
+  };
+  
   render() {
     return (
       <View style={styles.app}>
-        <Table></Table>
-        <Header></Header>
+        <Table currentWeek = {this.state.currentWeek}></Table>
+        <Header changeWeek = {(week) => this.changeWeektoTable(week)}></Header>
       </View>
     );
   }
