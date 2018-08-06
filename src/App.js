@@ -230,9 +230,6 @@ var day = new Date().getDay() - 1; // 本周的第几天
 var d = day;
 var weekDate = [];
 var nowDate = new Date();
-if (d < 1) {
-    d = 7;
-}
 var temp = nowDate;
 for (let i = 0; i < 7; i++) {
   if (i == 0) {
@@ -243,19 +240,11 @@ for (let i = 0; i < 7; i++) {
   weekDate[i] = (temp.getMonth() + 1) + "-" + temp.getDate();
 }
 
-var arr = new Array(7);
-for (let i = 0; i < 7; i++) {
-  arr[i] = new Array(7);
-}
-for (let i = 0; i < 7; i++) {
-  for (let j = 0; j < 7; j++) {
-    arr[i][j] = {}
-  }
-}
+
 
 let res = [
   {
-      "course": "编译原理",
+      "course": "编译原理（单周）",
       "teacher": "杨青",
       "weeks": "3,5,7,9,11,13,15,17,19",
       "day": "星期一",
@@ -266,6 +255,18 @@ let res = [
       "id": "1",
       "color": 0
   },
+  {
+    "course": "编译原理（双周）",
+    "teacher": "杨青",
+    "weeks": "2,4,6,8,10,12,14,16,18",
+    "day": "星期一",
+    "start": 3,
+    "during": 2,
+    "place": "本校9501",
+    "remind": false,
+    "id": "11",
+    "color": 1
+},
   {
       "course": "专业英语",
       "teacher": "朱瑄",
@@ -376,21 +377,34 @@ let res = [
   }
 ]
 
-var lessons = [
-	[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-  [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-]
+var CourseMap = new Map();
+res.map(lesson => {
+  let key = lesson.day + lesson.start;
+  let tmp = [];
+  if (CourseMap.get(key) != undefined) {
+    tmp = CourseMap.get(key);
+  }
+  tmp.push(lesson);
+  CourseMap.set(key, tmp)
+})
+
+var emptyGrids = [];
+for (let i = 0; i < 7; i++) {
+  emptyGrids[i] = new Array(14)
+}
+for (let i = 0; i < 7; i++) {
+  for (let j = 0; j < 14; j++) {
+    emptyGrids[i][j] = j;
+  }
+}
 
 class Table extends Component {
   constructor(props) {
     super(props);
     this.weekData = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
     this.order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+    this.colors = ['#f6b37f', '#f29c9f', '#13b5b1', '#8372D3'],
+    this.grey = '#8E8E93',
     this.weekDay = {
       "星期一": 0,
       "星期二": 1,
@@ -400,28 +414,21 @@ class Table extends Component {
       "星期六": 5,
       "星期日": 6
     },
-    this.colors = ['#f6b37f', '#f29c9f', '#13b5b1', '#8372D3'],
-    this.grey = '#8E8E93',
+    this.lesson = new Map(),
     this.state = {
       left: 100,
       top: 170,
-      lessons: [],
-      course: {}
+      courseList: []
     }
   }
   
   componentWillMount () {
     // TableService.getTableList().then((res) => {
     //   res.map(lesson => {
-        //   let day = lesson.day;
-        //   let index = (parseInt(lesson.start) - 1 ) / 2;
-        //   arr[index][parseInt(weekDay.day)] = lesson
-        // })
+    //    
+    //   })
     // })
-    
-    // this.setState({
-    //   lessons: arr
-    // })
+
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -506,9 +513,9 @@ class Table extends Component {
       </View>
       )
   };
-  showLesson = (item) => {
+  showLesson = (list) => {
     this.setState({
-      course: item
+      courseList: list
     })
     this.refs.lesson.show();
   };
@@ -526,6 +533,79 @@ class Table extends Component {
     return false;
   };
 
+  renderGrids = (column, index) => {
+      return (
+        <View style={day == index ?  [styles.lesson_column, styles.grid_today] : [styles.lesson_column, styles.grid_width]}>
+          {
+            column.map((item) => {
+              return (
+                <View style={index == day ? [styles.daily_lesson, styles.grid_today, styles.grid_height] : [styles.daily_lesson, styles.grid_width, styles.grid_height]}>
+                </View>
+              )
+            })
+          }
+      </View>
+      )
+  };
+  
+  hasCourse = (arr, week) => { // 查看是否有重叠时间的课
+    let result = {
+      course: arr[0],
+      flag: false
+    }
+    arr.map(item => {
+      if (this.inArray(item.weeks, week)) {
+        result.flag = true;
+        result.course = item;
+      } 
+    })
+    return result;
+  }
+
+  renderCourse = (item) => {
+    let list = CourseMap.get(item.day + item.start);
+    let flag = this.hasCourse(list, this.props.currentWeek).flag;
+    let id = this.hasCourse(list, this.props.currentWeek).course.id;
+      return  id == item.id && (
+        <View style={ [styles.item_center, styles.daily_lesson, {
+          width: parseInt(this.weekDay[item.day]) == day ? 200 : 100,
+          position: 'absolute',
+          top: (parseInt(item.start) - 1) * 100,
+          left: parseInt(this.weekDay[item.day]) <= day ?  parseInt(this.weekDay[item.day]) * 100 : parseInt(this.weekDay[item.day]) * 100 + 100,
+          height: parseInt(item.during) * 100
+        }]}>
+          <View onClick = {() => {this.showLesson(list)}} style={styles.item_center}>
+              <View style={[styles.item_center, styles.lesson_item, {
+                  backgroundColor:  flag ? this.colors[parseInt(item.color)] : this.grey,
+                  width: parseInt(this.weekDay[item.day]) == day ? 188 : 88
+                }]}>
+                {flag ? 
+                  <Text style={[styles.course_text, styles.font]}>{item.course}</Text>  
+                  :  <Text style={[styles.course_text, styles.font]}>{item.course}(非本周)</Text>}
+              </View>
+                <Text style={[styles.font]}>{item.teacher}</Text>
+                <Text style={[styles.font]}>@{item.place}</Text>
+                <Text style={[styles.font]}>{this.hasCourse(list, this.props.currentWeek).course.course}</Text>
+          </View>
+          <Modal ref="lesson" contentStyle={styles.lesson_modal}>
+            {this.state.courseList.map(course => {
+              return (
+                <Touchable onPress={this.hideLesson}>
+              <View style={[styles.item_center, styles.modal_cards]}>
+                <Text style={[styles.modal_font, styles.modal_course, {
+                  color: this.colors[course.color]
+                }]}>{course.course}</Text>
+                <Text style={[styles.modal_font]}>{course.teacher}</Text>
+                <Text style={[styles.modal_font]}>@{course.place}</Text>
+              </View>
+            </Touchable>
+              )
+            })}
+          </Modal>
+        </View>
+      )
+  }
+
   render() {
     return (
       <View>
@@ -538,60 +618,9 @@ class Table extends Component {
           }} 
           {...this._panResponder.panHandlers}
         >
-          {lessons.map((column, index) => {
-            return (
-              <View style={day == index ?  [styles.lesson_column, styles.grid_today] : [styles.lesson_column, styles.grid_width]}>
-                {column.map((item, index) => {
-                  return(
-                    <View style={[styles.daily_lesson]}>
-                      <Text>{item}</Text>
-                      </View>
-                  )
-                  {/*
-                   if (item.course != null || item.course != undefined) {
-                    return (
-                      <View style={index == day ? [styles.item_center, styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width, styles.item_center]}>
-                        <View onClick = {() => {this.showLesson(item)}} style={styles.item_center}>
-                            <View style={[styles.item_center, styles.lesson_item, {
-                                backgroundColor:  this.inArray(item.weeks, this.props.currentWeek) ? this.colors[parseInt(item.color)] : this.grey,
-                                width: index == day ? 188 : 88
-                              }]}>
-                              <Text style={[styles.course_text, styles.font]}>{item.course}</Text>
-                            </View>
-                              <Text style={[styles.font]}>{item.teacher}</Text>
-                              <Text style={[styles.font]}>@{item.place}</Text>
-                        </View>
-                        <Modal ref="lesson" contentStyle={styles.lesson_modal}>
-                          <Touchable onPress={this.hideLesson}>
-                            <View style={[styles.item_center]}>
-                              <Text style={[styles.modal_font, styles.modal_course, {
-                                color: this.colors[this.state.course.color]
-                              }]}>{this.state.course.course}</Text>
-                              <Text style={[styles.modal_font]}>{this.state.course.teacher}</Text>
-                              <Text style={[styles.modal_font]}>@{this.state.course.place}</Text>
-                            </View>
-                          </Touchable>
-                        </Modal>
-                      </View>
-                    )
-                  } 
-                  else {
-                    return (
-                      <View style={index == day ? [styles.daily_lesson, styles.grid_today] : [styles.daily_lesson, styles.grid_width]}>
-                      <View style={[styles.grid_border, {
-                        width: index == day ? 200 : 100
-                      }]}>
-                      <Text>{item}</Text>
-                      </View>
-                      </View>
-                    )
-                  }*/}
-                }
-              )
-            }
-            </View>
-            )
-          })}
+          {emptyGrids.map(this.renderGrids)}
+          {res.map(this.renderCourse)}
+          {/* {CourseMap.forEach(this.renderCourse)} */}
         </View>
         <View style={[styles.column, styles.grid_width,{
                 top: this.state.top

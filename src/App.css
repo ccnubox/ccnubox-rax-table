@@ -168,15 +168,15 @@
 .lesson_column{
   display: flex;
   flex-direction: column;
+  background-color: #ffffff;
 }
+
 .daily_lesson {
-  display: flex;
   border-right: 1 solid #F0F0F1;
   flex-direction: column;
   background-color: #ffffff;
-  align-items: center;
-  height: 100;
 }
+
 .grid_border {
   height: 100;
 }
@@ -186,21 +186,20 @@
 
 .lesson_item {
   border-radius: 12;
-  width: 88;
-  padding: 10 0;
+  padding: 30 0;
 }
 
 .lesson_modal {
   width: 300;
-  height: 150;
-  border-radius: 12;
   position: absolute;
   left: 225;
   top: 170;
 }
+
 .course_text {
   color: #ffffff;
 }
+
 .item_center {
   align-items: center;
   justify-content: center;
@@ -214,6 +213,7 @@
 }
 .modal_course {
   margin: 20 0;
+  background-color: transparent;
 }
 .current {
   color: #f6b37f;
@@ -231,4 +231,11 @@
   position: absolute;
   top: 20;
   right: 50;
+}
+.modal_cards {
+  margin-bottom: 50;
+  background-color: #ffffff;
+  width: 300;
+  height: 150;
+  border-radius: 12;
 }
