@@ -1,0 +1,45 @@
+.app {
+  flex: 1;
+  align-items: center;
+  background-color: #efeff4;
+  width: 750;
+  height: 1200;
+}
+
+.flex_row {
+  flex-direction: row;
+}
+.header {
+  width: 750;
+  height: 60;
+  background-color: #ffffff;
+  align-items: center;
+  justify-content: space-between;
+  align-items: center;
+}
+.table {
+  margin-left: 30;
+}
+.header_finish {
+  margin-right: 30;
+}
+.header_text {
+  font-size: 28;
+  color: #6767fa;
+}
+.box {
+  width: 500;
+  background-color: #ffffff;
+  border-radius: 20;
+} 
+.info_box {
+  height: 150;
+  margin-top: 50;
+}
+.time_box {
+  height: 250;
+  margin-top: 20;
+}
+.time {
+  margin-top: 50;
+}

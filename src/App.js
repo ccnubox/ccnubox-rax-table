@@ -214,7 +214,7 @@ class Header extends Component {
           </View>
           <View style={styles.add}>
             <Link
-              href="http://192.168.1.16:9999/js/second.bundle.js?_wx_tpl=http://192.168.1.16:9999/js/second.bundle.js"
+              href="http://192.168.1.16:9999/js/second.bundle.js?_wx_tpl=http://192.168.1.16:9999/js/index.second.js"
               style={[styles.fresh_text]}
             >
             添课
@@ -583,11 +583,14 @@ class Table extends Component {
                   <Text style={[styles.course_text, styles.font]}>{item.course}</Text>  
                   :  <Text style={[styles.course_text, styles.font]}>{item.course}(非本周)</Text>}
               </View>
+                <View style={[styles.item_center, styles.course_info]}>
                 <Text style={[styles.font]}>{item.teacher}</Text>
-                <Text style={[styles.font]}>@{item.place}</Text>
-                <Text style={[styles.font]}>{this.hasCourse(list, this.props.currentWeek).course.course}</Text>
+                <Text style={[styles.font, styles.grey_font ]}>@{item.place}</Text>
+                </View>
           </View>
-          <Modal ref="lesson" contentStyle={styles.lesson_modal}>
+          <Modal ref="lesson" contentStyle={[styles.lesson_modal, {
+            height: 200 * this.state.courseList.length - 50
+          }]}>
             {this.state.courseList.map(course => {
               return (
                 <Touchable onPress={this.hideLesson}>
@@ -620,7 +623,6 @@ class Table extends Component {
         >
           {emptyGrids.map(this.renderGrids)}
           {res.map(this.renderCourse)}
-          {/* {CourseMap.forEach(this.renderCourse)} */}
         </View>
         <View style={[styles.column, styles.grid_width,{
                 top: this.state.top

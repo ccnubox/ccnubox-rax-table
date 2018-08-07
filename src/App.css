@@ -186,7 +186,7 @@
 
 .lesson_item {
   border-radius: 12;
-  padding: 30 0;
+  padding: 20 0;
 }
 
 .lesson_modal {
@@ -194,6 +194,7 @@
   position: absolute;
   left: 225;
   top: 170;
+  background-color: transparent;
 }
 
 .course_text {
@@ -213,7 +214,6 @@
 }
 .modal_course {
   margin: 20 0;
-  background-color: transparent;
 }
 .current {
   color: #f6b37f;
@@ -238,4 +238,10 @@
   width: 300;
   height: 150;
   border-radius: 12;
+}
+.grey_font {
+  color: #8E8E93;
+}
+.course_info {
+  margin-top: 10;
 }
