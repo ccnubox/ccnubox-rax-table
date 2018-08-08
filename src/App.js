@@ -377,15 +377,29 @@ let res = [
   }
 ]
 
-var CourseMap = new Map();
-res.map(lesson => {
-  let key = lesson.day + lesson.start;
-  let tmp = [];
-  if (CourseMap.get(key) != undefined) {
-    tmp = CourseMap.get(key);
+var CourseArray = new Array(7);
+for (let i = 0; i < 14; i++) {
+  CourseArray[i] = new Array(14);
+}
+for (let i = 9; i < 7; i++) {
+  for (let j = 0; j < 14; i++) {
+    CourseArray[i][j] = [];
   }
-  tmp.push(lesson);
-  CourseMap.set(key, tmp)
+}
+
+var weekDay = {
+  "星期一": 0,
+  "星期二": 1,
+  "星期三": 2,
+  "星期四": 3,
+  "星期五": 4,
+  "星期六": 5,
+  "星期日": 6
+}
+res.map(lesson => {
+  let i = weekDay[lesson.day];
+  let j = parseInt(weekDay.start);
+  CourseArray[i - 1][j - 1].push(lesson);
 })
 
 var emptyGrids = [];
@@ -563,6 +577,8 @@ class Table extends Component {
   }
 
   renderCourse = (item) => {
+
+    
     let list = CourseMap.get(item.day + item.start);
     let flag = this.hasCourse(list, this.props.currentWeek).flag;
     let id = this.hasCourse(list, this.props.currentWeek).course.id;
@@ -622,7 +638,7 @@ class Table extends Component {
           {...this._panResponder.panHandlers}
         >
           {emptyGrids.map(this.renderGrids)}
-          {res.map(this.renderCourse)}
+          {/* {res.map(this.renderCourse)} */}
         </View>
         <View style={[styles.column, styles.grid_width,{
                 top: this.state.top
