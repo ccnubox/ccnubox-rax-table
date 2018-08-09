@@ -636,7 +636,6 @@ class Table extends Component {
           {...this._panResponder.panHandlers}
         >
           {emptyGrids.map(this.renderGrids)}
-          {/* {res.map(this.renderCourse)} */}
           {CourseArray.map((column, index) => {
             return (
               <View style={day == index ?  [styles.lesson_column, styles.grid_today] : [styles.lesson_column, styles.grid_width]}>
