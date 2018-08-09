@@ -577,8 +577,6 @@ class Table extends Component {
   }
 
   renderCourse = (item) => {
-
-    
     let list = CourseMap.get(item.day + item.start);
     let flag = this.hasCourse(list, this.props.currentWeek).flag;
     let id = this.hasCourse(list, this.props.currentWeek).course.id;
@@ -639,6 +637,54 @@ class Table extends Component {
         >
           {emptyGrids.map(this.renderGrids)}
           {/* {res.map(this.renderCourse)} */}
+          {CourseArray.map((column, index) => {
+            return (
+              <View style={day == index ?  [styles.lesson_column, styles.grid_today] : [styles.lesson_column, styles.grid_width]}>
+                {column.map((list, index) => {
+                  if(list.length > 0) {
+                    let flag = this.hasCourse(list, this.props.currentWeek).flag;
+                    let item = this.hasCourse(list, this.props.currentWeek).course.course;
+                    return (
+                      <View style={ [styles.item_center, styles.daily_lesson, {
+                        width: parseInt(this.weekDay[item.day]) == day ? 200 : 100,
+                        height: parseInt(item.during) * 100
+                      }]}>
+                        <View onClick = {() => {this.showLesson(list)}} style={styles.item_center}>
+                            <View style={[styles.item_center, styles.lesson_item, {
+                                  backgroundColor:  flag ? this.colors[parseInt(item.color)] : this.grey,
+                                  width: index == day ? 188 : 88
+                              }]}>
+                              {flag ? 
+                                <Text style={[styles.course_text, styles.font]}>{item.course}</Text>  
+                                :  <Text style={[styles.course_text, styles.font]}>{item.course}(非本周)</Text>}                            </View>
+                              <Text style={[styles.font]}>{item.teacher}</Text>
+                              <Text style={[styles.font]}>@{item.place}</Text>
+                        </View>
+                        <Modal ref="lesson" contentStyle={[styles.lesson_modal, {
+                            height: 200 * this.state.courseList.length - 50
+                          }]}>
+                        {this.state.courseList.map(course => {
+                          return (
+                            <Touchable onPress={this.hideLesson}>
+                            <View style={[styles.item_center, styles.modal_cards]}>
+                              <Text style={[styles.modal_font, styles.modal_course, {
+                                color: this.colors[course.color]
+                              }]}>{course.course}</Text>
+                              <Text style={[styles.modal_font]}>{course.teacher}</Text>
+                              <Text style={[styles.modal_font]}>@{course.place}</Text>
+                            </View>
+                          </Touchable>
+                        )
+                        })}
+                        </Modal>
+                      </View>
+                    )
+                  }
+                }
+                )
+            }
+            </View>
+          )})}
         </View>
         <View style={[styles.column, styles.grid_width,{
                 top: this.state.top
