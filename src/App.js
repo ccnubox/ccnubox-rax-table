@@ -402,7 +402,7 @@ res.map((lesson) => {
   let start = parseInt(lesson.start);
   let during = parseInt(lesson.during);
   
-  for (j = start; j < during + start; j++) {
+  for (let j = start; j < during + start; j++) {
     if(CourseArray[i][j - 1] == undefined){
     CourseArray[i][j - 1] = []
   }
@@ -612,18 +612,19 @@ class Table extends Component {
                       }]}>
                         <View onClick = {() => {this.showLesson(list)}} style={styles.item_center}>
                             <View style={[styles.item_center, styles.lesson_item, {
-                                  backgroundColor:  flag ? this.colors[parseInt(item.color)] : this.grey,
+                                  backgroundColor: flag ? this.colors[parseInt(item.color)] : this.grey,
                                   width: index == day ? 188 : 88
                               }]}>
                               {flag ? 
                                 <Text style={[styles.course_text, styles.font]}>{item.course}</Text>  
-                                :  <Text style={[styles.course_text, styles.font]}>{item.course}(非本周)</Text>}                            </View>
+                                :  <Text style={[styles.course_text, styles.font]}>{item.course}(非本周)</Text>}                            
+                              </View>
                               <View style={[styles.item_center, styles.course_info]}>
                                 <Text style={[styles.font]}>{item.teacher}</Text>
                                 <Text style={[styles.font, styles.grey_font]}>@{item.place}</Text>
                               </View>
                               { list.length > 1 && <View style={[styles.more]}></View>}
-                        </View>
+                            </View>
                         <Modal ref="lesson" contentStyle={[styles.lesson_modal, {
                             height: 200 * this.state.courseList.length - 50
                           }]}>

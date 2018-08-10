@@ -1,4 +1,4 @@
-import {createElement, Component, render} from 'rax';
+import {createElement, Component} from 'rax';
 import View from 'rax-view';
 import Text from 'rax-text';
 import styles from "./add.css";
@@ -19,15 +19,25 @@ class Add extends Component {
       	course: "",
       	weeks: "",
       	day: "",
-        start: "",
-        during: "", 
+        start: 1,
+        during: 2, 
         place: "", 
         remind: false
       },
-      weeks: [],
-      startInt: 1,
-      duringInt: 1
+      weeksArray: [],
+      weekVisible: false,
+      timeVisible: false
     }
+  }
+  showWeek = () => {
+    this.setState({
+      weekVisible: !this.state.weekVisible
+    })
+  }
+  showTime = () => {
+    this.setState({
+      timeVisible: !this.state.timeVisible
+    })
   }
 
   render() {
@@ -51,11 +61,26 @@ class Add extends Component {
         </View>
         <Text style={[styles.time]}>上课时间</Text>
         <View style={[styles.box, styles.time_box]}>
-          
+          <Touchable style={[styles.input_box]} OnClick = {() => {this.showWeek}}>
+            <Text style={[styles.input_word, styles.center]}>选择上课周次</Text>
+        	</Touchable>
+          <Touchable style={[styles.input_box]} OnClick = {() => {this.showTime}}>
+            <Text style={[styles.input_word, styles.center]}>选择上课时间</Text>
+        	</Touchable>
+           <TextInput
+            placeholder="请输入上课地点"
+            value={this.state.course.place}
+            style={[styles.input_box]}
+            />
         </View>
+        {this.state.weekVisible && <View style={[styles.modal]}>
+          </View>}
+        {this.state.timeVisible &&  <View style={[styles.modal]}>
+          </View>}
       </View>
     )
   }
 }
+
 
 export default Add;

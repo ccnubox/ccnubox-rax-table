@@ -5,7 +5,9 @@
   width: 750;
   height: 1200;
 }
-
+.center {
+  align-items: center; 
+}
 .flex_row {
   flex-direction: row;
 }
@@ -31,15 +33,30 @@
   width: 500;
   background-color: #ffffff;
   border-radius: 20;
+  padding: 5 0;
 } 
 .info_box {
   height: 150;
-  margin-top: 50;
+  margin-top: 50; 
+}
+.input_box {
+  height: 70;
+  width: 100%;
 }
 .time_box {
-  height: 250;
+  height: 220;
   margin-top: 20;
 }
 .time {
   margin-top: 50;
+}
+.input_word {
+  margin-left: 20;
+  font-size: 25;
+}
+.modal  {
+  position: absolute;
+  width: 750;
+  height: 600;
+  background-color: #ffffff;
 }
