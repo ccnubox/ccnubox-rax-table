@@ -136,11 +136,6 @@
   height: 80;
 }
 
-.grid {
-  border-bottom: 1 solid #efeff4;
-  border-right: 1 solid #efeff4;
-  height: 200;
-}
 
 .column {
   display: flex;
@@ -163,25 +158,23 @@
   position: absolute;
   flex-direction: row;
   display: flex;
+  background-color: #ffffff;
 }
 
-.lesson_column{
+.lesson_column {
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
 }
 
-.daily_lesson {
-  border-right: 1 solid #F0F0F1;
-  flex-direction: column;
-  background-color: #ffffff;
-}
 
 .grid_border {
   height: 100;
 }
-.grid_border, .daily_lesson {
+
+.daily_lesson {
   border-bottom: 1 solid #F0F0F1;
+  background-color: #ffffff;
+  border-right: 1 solid #F0F0F1;
 }
 
 .lesson_item {
@@ -244,4 +237,10 @@
 }
 .course_info {
   margin-top: 10;
+}
+.more{
+  background-color: #8E8E93;
+  width: 20;
+  height: 20;
+  margin-left: 80;
 }
