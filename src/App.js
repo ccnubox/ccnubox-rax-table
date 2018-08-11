@@ -260,7 +260,7 @@ let res = [
     "teacher": "杨青",
     "weeks": "2,4,6,8,10,12,14,16,18",
     "day": "星期一",
-    "start": 3,
+    "start": 4,
     "during": 2,
     "place": "本校9501",
     "remind": false,
@@ -603,6 +603,7 @@ class Table extends Component {
                   if(list.length > 0) {
                     let flag = this.hasCourse(list, this.props.currentWeek).flag;
                     let item = this.hasCourse(list, this.props.currentWeek).course;
+                    if (i == parseInt(item.start)) {
                     return (
                       <View style={ [styles.item_center, styles.daily_lesson, {
                         width: this.weekDay[item.day] == day ? 200 : 100,
@@ -643,15 +644,15 @@ class Table extends Component {
                         })}
                         </Modal>
                       </View>
-                    )
-                  } else {
+                    )}
+                  }
                     return (
                       <View style={[{ width: index == day ? 200 : 100,
                               position: 'absolute',
               				        top:  i * 100,
                             }, styles.daily_lesson, styles.grid_height]}> 
                       </View>)}
-                  }
+                  
                 )
             }
           </View>
