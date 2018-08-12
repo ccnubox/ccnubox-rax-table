@@ -28,9 +28,14 @@ class Add extends Component {
       weeksArray: [],
       weekMap: [],
       weekVisible: false,
-      timeVisible: false
+      timeVisible: false,
+      choosingOdd: false,
+      choosingEven: false,
+      choosingAll: false
     }
-    this.weeks = []
+    this.weeks = [],
+    this.weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期天'],
+    this.timeArr = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
   }
   componentWillMount() {
     let tempArr = new Array(24);
@@ -40,8 +45,13 @@ class Add extends Component {
     this.setState({
       weekMap: tempArr
     });
-    for (let i = 1; i <= 24; i++) {
-      this.weeks.push(i);
+    for (let i = 0; i < 4; i++) {
+        this.weeks[i] = []
+    }
+    for (let i = 0; i <= 3; i++) {
+      for (let j = 1; j <= 6; j++) {
+        this.weeks[i].push(i * 6 + j)
+      }
     }
   }
   
@@ -62,39 +72,57 @@ class Add extends Component {
   };
   confirmWeek = () => {
     this.refs.weekModal.hide();
-  };
-  chooseOddWeeks = () => {
-    let tempMap = [];
-    for(let i = 1; i <= 24; i++) {
-      i % 2? tempMap[i] = true : tempMap[i] = false;
+    let tempArr = [];
+    for (let i = 0; i < 24; i++) {
+      if (this.state.weekMap[i]) {
+        tempArr.push(i + 1)
+      }
     }
     this.setState({
-      weekMap: tempMap
+      weeksArray: tempArr
+    })
+   };
+  chooseOddWeeks = () => {
+    let tempMap = [];
+    for(let i = 0; i < 24; i++) {
+      i % 2 ? tempMap[i] = false : tempMap[i] = true;
+    }
+    this.setState({
+      weekMap: tempMap,
+      choosingOdd: true,
+      choosingEven: false,
+      choosingAll: false
     })
   };
   chooseEvenWeeks = () => {
     let tempMap = [];
-    for(let i = 1; i <= 24; i++) {
-      i % 2? tempMap[i] = false : tempMap[i] = true;
+    for(let i = 0; i < 24; i++) {
+      i % 2 ? tempMap[i] = true : tempMap[i] = false;
     }
     this.setState({
-      weekMap: tempMap
+      weekMap: tempMap,
+      choosingEven: true,
+      choosingOdd: false,
+      choosingAll: false
     })
   };
   chooseAllWeeks = () => {
     let tempMap = [];
-    for(let i = 1; i <= 24; i++) {
+    for(let i = 0; i <= 23; i++) {
       tempMap[i] = true;
     }
     this.setState({
-      weekMap: tempMap
+      weekMap: tempMap,
+      choosingAll: true,
+      choosingOdd: false,
+      choosingEven: false
     })
   };
   chooseOneWeek = (i) => {
     let tempMap = this.state.weekMap;
     tempMap[i] = !tempMap[i]
     this.setState({
-      weekMap: !tempMap
+      weekMap: tempMap
     })
   }
   render() {
@@ -133,52 +161,105 @@ class Add extends Component {
         <Modal ref="weekModal" contentStyle={[styles.modal]}>
             <View style={[styles.modal_header, styles.center]}>
               <Touchable onPress={this.hideWeek}>
-            <Text>取消</Text>
+            <Text style={[styles.purple_text]}>取消</Text>
              </Touchable>
             <Touchable onPress={this.confirmWeek}>
-             <Text>确认</Text>
+             <Text style={[styles.purple_text]}>确认</Text>
           	</Touchable>
               </View>
            <View style={[styles.choose_cont, styles.center]}>
              <View style={[styles.choose_week]}>
-             	<View style={[styles.table_header]}>
-                 <Touchable onPress={this.chooseOddWeeks}>
-            		<Text>单周</Text>
+             	<View style={[styles.border_bottom, styles.table_header, styles.table_row, styles.row_height, styles.center, {
+                       backgroundColor: this.state.choosingOdd ? '#6767fa' : '#ffffff'
+                     }]}>
+                 <Touchable onPress={this.chooseOddWeeks} style={[styles.equal_div, styles.center, styles.border_right]}>
+                   <View style={[styles.table_row, styles.center]}>
+            		<Text style={[{color: this.state.choosingOdd ? '#ffffff' : '#6767fa'}]}>单周</Text>
+                     </View>
                  </Touchable>
-               <Touchable onPress={this.chooseEvenWeeks}>
-              <Text>双周</Text>
+               <Touchable onPress={this.chooseEvenWeeks} style={[styles.equal_div, styles.center, styles.border_right, {
+                       backgroundColor: this.state.choosingEven ? '#6767fa' : '#ffffff'
+                     }]}>
+                 <View style={[styles.table_row, styles.center]}>
+              <Text style={[{color: this.state.choosingEven ? '#ffffff' : '#6767fa'}]}>双周</Text>
+                    </View>
                </Touchable>
-               <Touchable onPress={this.chooseAllWeeks}>
-                <Text>全选</Text>
+               <Touchable onPress={this.chooseAllWeeks} style={[styles.equal_div, styles.center, styles.row_height, {
+                       backgroundColor: this.state.choosingAll ? '#6767fa' : '#ffffff'
+                     }]}>
+                <View style={[styles.table_row, styles.center]}>
+                 <Text style={[{color: this.state.choosingAll ? '#ffffff' : '#6767fa'}]}>全选</Text>
+                  </View>
                </Touchable>
                </View>
                <View>
-                 {this.weeks.map((i) => {
+                 {this.weeks.map((row, rowIndex) => {
                    return (
-                     <View>
-                       <Text>{i}</Text>
-                       </View>
-                   )
+                     <View style={rowIndex != 3 ? [styles.table_row, styles.border_bottom, styles.center] : [styles.table_row, styles.center]}>
+                       { row.map((item, itemIndex) => {
+                       return (
+                         <Touchable onPress={() => {this.chooseOneWeek(item - 1)}} style={itemIndex != 5 ? 
+                             [styles.border_right, styles.equal_div, styles.center, {
+                       			backgroundColor: this.state.weekMap[item - 1] ? '#feb75a' : '#ffffff'
+                     		  }] : [styles.equal_div, styles.center, {
+                       				backgroundColor: this.state.weekMap[item - 1] ? '#feb75a' : '#ffffff'
+                     				}]}>
+                       	 	<View style={[styles.table_row, styles.center]}>
+                           <Text>{item}</Text>   
+                        	</View>
+                        </Touchable>    
+                       )
+                     }
+                   )}
+                    </View>
+                  )
                  })}
                  </View>
             </View>
             </View>
         </Modal>
         <Modal ref="timeModal">
+          <View style={[styles.modal_header, styles.center]}>
+              <Touchable onPress={this.hideWeek}>
+            <Text style={[styles.purple_text]}>取消</Text>
+             </Touchable>
+            <Touchable onPress={this.confirmWeek}>
+             <Text style={[styles.purple_text]}>确认</Text>
+          	</Touchable>
+          </View>
           <View>
-            <Touchable onPress={this.hideTime}>
-            <Text>
-              Close
-            </Text>
-          </Touchable>
-            <Text>
-              I am a time
-            </Text>
+              <View>
+              <ScrollView
+                ref={(scrollView) => {
+                  this.WeekScrollView = scrollView;
+                }}
+                
+              >
+                {weekdays.map((day, index) => {
+
+                })}
+              </ScrollView>
+              <ScrollView
+                ref={(scrollView) => {
+                  this.StartScrollView = scrollView;
+                }}
+              >
+                {this.timeArr.map()}
+              </ScrollView>
+              <ScrollView
+                ref={(scrollView) => {
+                  this.EndScrollView = scrollView;
+                }}
+              >
+                {this.timeArr.map()}
+              </ScrollView>
+              </View>
           </View>
         </Modal>
       </View>
     )
   }
 }
+
 
 export default Add;

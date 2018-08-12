@@ -214,7 +214,7 @@ class Header extends Component {
           </View>
           <View style={styles.add}>
             <Link
-              href="http://192.168.1.16:9999/js/second.bundle.js?_wx_tpl=http://192.168.1.16:9999/js/index.second.js"
+              href="http://192.168.0.114:9999/js/second.bundle.js?_wx_tpl=http://192.168.0.114:9999/js/index.second.js"
               style={[styles.fresh_text]}
             >
             添课
@@ -226,11 +226,15 @@ class Header extends Component {
   }
 }
 
-var day = new Date().getDay() - 1; // 本周的第几天
+var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
+if (day == -1) {
+  day = 6; 
+}
 var d = day;
 var weekDate = [];
 var nowDate = new Date();
 var temp = nowDate;
+
 for (let i = 0; i < 7; i++) {
   if (i == 0) {
       temp.setDate(temp.getDate() - d);
@@ -239,176 +243,6 @@ for (let i = 0; i < 7; i++) {
   }
   weekDate[i] = (temp.getMonth() + 1) + "-" + temp.getDate();
 }
-
-
-
-let res = [
-  {
-      "course": "编译原理（单周）",
-      "teacher": "杨青",
-      "weeks": "3,5,7,9,11,13,15,17,19",
-      "day": "星期一",
-      "start": 3,
-      "during": 2,
-      "place": "本校9501",
-      "remind": false,
-      "id": "1",
-      "color": 0
-  },
-  {
-    "course": "编译原理（双周）",
-    "teacher": "杨青",
-    "weeks": "2,4,6,8,10,12,14,16,18",
-    "day": "星期一",
-    "start": 4,
-    "during": 2,
-    "place": "本校9501",
-    "remind": false,
-    "id": "11",
-    "color": 1
-},
-  {
-      "course": "专业英语",
-      "teacher": "朱瑄",
-      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-      "day": "星期二",
-      "start": 3,
-      "during": 2,
-      "place": "本校9501",
-      "remind": false,
-      "id": "2",
-      "color": 1
-  },
-  {
-      "course": "操作系统原理",
-      "teacher": "朱瑄",
-      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-      "day": "星期二",
-      "start": 7,
-      "during": 2,
-      "place": "本校6205",
-      "remind": false,
-      "id": "3",
-      "color": 2
-  },
-  {
-      "course": "人工智能",
-      "teacher": "郭京蕾",
-      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-      "day": "星期二",
-      "start": 9,
-      "during": 2,
-      "place": "本校9-12",
-      "remind": false,
-      "id": "4",
-      "color": 3
-  },
-  {
-      "course": "设计模式",
-      "teacher": "外聘1",
-      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-      "day": "星期三",
-      "start": 7,
-      "during": 2,
-      "place": "本校JKSYS2",
-      "remind": false,
-      "id": "5",
-      "color": 0
-  },
-  {
-      "course": "软件工程导论",
-      "teacher": "外聘1",
-      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-      "day": "星期四",
-      "start": 1,
-      "during": 2,
-      "place": "本校6205",
-      "remind": false,
-      "id": "6",
-      "color": 1
-  },
-  {
-      "course": "操作系统原理",
-      "teacher": "朱瑄",
-      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-      "day": "星期四",
-      "start": 3,
-      "during": 2,
-      "place": "本校6205",
-      "remind": false,
-      "id": "7",
-      "color": 2
-  },
-  {
-      "course": "数据库课程设计",
-      "teacher": "罗昌银",
-      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-      "day": "星期四",
-      "start": 7,
-      "during": 2,
-      "place": "本校JKSYS2",
-      "remind": false,
-      "id": "8",
-      "color": 3
-  },
-  {
-      "course": "软件项目管理",
-      "teacher": "李蓉",
-      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-      "day": "星期四",
-      "start": 9,
-      "during": 2,
-      "place": "本校9-12",
-      "remind": false,
-      "id": "9",
-      "color": 0
-  },
-  {
-      "course": "编译原理",
-      "teacher": "杨青",
-      "weeks": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19",
-      "day": "星期五",
-      "start": 1,
-      "during": 2,
-      "place": "本校9501",
-      "remind": false,
-      "id": "10",
-      "color": 1
-  }
-]
-
-var CourseArray = new Array(7);
-for (let i = 0; i < 14; i++) {
-  CourseArray[i] = new Array(14);
-}
-for (let i = 0; i < 7; i++) {
-  for (let j = 0; j < 14; j++) {
-    CourseArray[i][j] = new Array();
-  }
-}
-
-var weekDay = {
-  "星期一": 0,
-  "星期二": 1,
-  "星期三": 2,
-  "星期四": 3,
-  "星期五": 4,
-  "星期六": 5,
-  "星期日": 6
-}
-
-res.map((lesson) => {
-  let i = weekDay.indexOf(lesson.day);
-  let start = parseInt(lesson.start);
-  let during = parseInt(lesson.during);
-  
-  for (let j = start; j < during + start; j++) {
-    if(CourseArray[i][j - 1] == undefined){
-    CourseArray[i][j - 1] = []
-  }
-    CourseArray[i][j - 1].push(lesson)
-  }
-})
 
 var emptyGrids = [];
 for (let i = 0; i < 7; i++) {
@@ -440,17 +274,13 @@ class Table extends Component {
     this.state = {
       left: 100,
       top: 170,
-      courseList: []
+      courseList: [],
+      courseArray: []
     }
   }
   
   componentWillMount () {
-    // TableService.getTableList().then((res) => {
-    //   res.map(lesson => {
-    //    
-    //   })
-    // })
-
+    this.getCourse();
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -474,6 +304,34 @@ class Table extends Component {
     this._updateTop();
   };
   
+  getCourse = () => {
+    var _CourseArray = new Array(7);
+    for (let i = 0; i < 7; i++) {
+      _CourseArray[i] = new Array(14);
+    }
+    for (let i = 0; i < 7; i++) {
+      for (let j = 0; j < 14; j++) {
+        _CourseArray[i][j] = new Array();
+      }
+    }
+    TableService.getTableList().then((res) => {
+      res.map((lesson) => {
+        let i = weekDay[lesson.day];
+        let start = parseInt(lesson.start);
+        let during = parseInt(lesson.during);
+        
+        for (let j = start; j < during + start; j++) {
+          if(CourseArray[i][j - 1] == undefined){
+          _CourseArray[i][j - 1] = []
+        }
+          _CourseArray[i][j - 1].push(lesson)
+        }
+      })
+    })
+    this.setState({
+      CourseArray: _CourseArray
+    })
+  }
   _updateLeft() {
     let LeftTemp = this._tableStyles.style.left;
     if (LeftTemp > 80) {LeftTemp = 80;} 
