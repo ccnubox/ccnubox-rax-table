@@ -214,7 +214,7 @@ class Header extends Component {
           </View>
           <View style={styles.add}>
             <Link
-              href="http://192.168.0.114:9999/js/second.bundle.js?_wx_tpl=http://192.168.0.114:9999/js/index.second.js"
+              href="http://192.168.0.114:9999/js/second.bundle.js?_wx_tpl=http://192.168.0.114:9999/js/second.bundle.js"
               style={[styles.fresh_text]}
             >
             添课
@@ -454,7 +454,7 @@ class Table extends Component {
           }} 
           {...this._panResponder.panHandlers}
         >		
-          {CourseArray.map((column, index) => {
+          {this.state.CourseArray.map((column, index) => {
             return (
               <View style={day == index ?  [styles.lesson_column, styles.grid_today] : [styles.lesson_column, styles.grid_width]}>
                 {column.map((list, i) => {

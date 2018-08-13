@@ -18,13 +18,9 @@
   align-items: center;
   justify-content: space-between;
   align-items: center;
+  padding: 0 30;
 }
-.table {
-  margin-left: 30;
-}
-.header_finish {
-  margin-right: 30;
-}
+
 .header_text {
   font-size: 28;
   color: #6767fa;
@@ -93,4 +89,23 @@
 }
 .border_right {
   border-right: 2 solid #ccccff;
+}
+.time_cont {
+  padding: 0 60;
+  flex-direction: row;
+  justify-content: center;
+  width: 750;
+  height: 404;
+}
+.time_scroll {
+  height: 404;
+}
+.time_item {
+  height: 80;
+  justify-content: center;
+}
+.choosed {
+  font-size: 40;
+  border-top: 2 solid #efeff4;
+  border-bottom: 2 solid #efeff4;
 }

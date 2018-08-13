@@ -15,16 +15,15 @@ class Add extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      course: {
-        teacher: "",
-      	course: "",
-      	weeks: "",
-      	day: "",
-        start: 1,
-        during: 2, 
-        place: "", 
-        remind: false
-      },
+      teacher: "",
+      course: "",
+      weeks: "",
+      day: "",
+      during: 2, 
+      place: "", 
+      day: "星期三",
+      startTime: 3,
+      endTime: 3,
       weeksArray: [],
       weekMap: [],
       weekVisible: false,
@@ -34,7 +33,7 @@ class Add extends Component {
       choosingAll: false
     }
     this.weeks = [],
-    this.weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期天'],
+    this.weekdays = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
     this.timeArr = [1,2,3,4,5,6,7,8,9,10,11,12,13,14]
   }
   componentWillMount() {
@@ -52,8 +51,8 @@ class Add extends Component {
       for (let j = 1; j <= 6; j++) {
         this.weeks[i].push(i * 6 + j)
       }
-    }
-  }
+   }
+  };
   
   showWeek = () => {
     this.refs.weekModal.show();
@@ -124,23 +123,62 @@ class Add extends Component {
     this.setState({
       weekMap: tempMap
     })
-  }
+  };
+
+  chooseDay = (day, index) => {
+    this.setState({
+      day: day
+    })
+    this.WeekScrollView.scrollTo({y: (index - 2) * 80})
+  };
+
+  chooseStart = (item, index) => {
+    this.setState({
+      startTime: item
+    })
+    this.StartScrollView.scrollTo({y: (index - 2) * 80})
+  };
+
+  chooseEnd = (item, index) => {
+    this.setState({
+      endTime: item
+    })
+    this.EndScrollView.scrollTo({y: (index - 2) * 80})
+  };
+
+  confirmAdd = () => {
+    let course = {
+      course: this.state.course,
+      teacher: this.state.teacher,
+      weeks: this.state.weeksArray.toString(),
+      day: this.state.day,
+      start: this.state.startTime,
+      during: this.state.endTime - this.state.startTime + 1,
+      place: this.state.place,
+      remind: false
+    }
+    TableService.addLesson(big, sid, jid, password, course).then(res => {
+      // 跳转到 index
+    })
+  };
   render() {
     return (
       <View style={styles.app}>
         <View style={[styles.header, styles.flex_row ]}>
           <Text style={[styles.header_text, styles.table]}>课程表</Text>
-          <Text style={[styles.header_text, styles.header_finsh]}>完成</Text>
+          <Touchable onPress={() => {this.confirmAdd}}>
+            <Text style={[styles.header_text, styles.header_finsh]}>完成</Text>
+          </Touchable>
         </View>
         <View style={[styles.box, styles.info_box]}>
           <TextInput
             placeholder="请输入课程名称"
-            value={this.state.course.course}
+            value={this.state.course}
             style={[styles.input_box]}
             />
           <TextInput
             placeholder="请输入任教教师"
-            value={this.state.course.teacher}
+            value={this.state.teacher}
             style={[styles.input_box]}
             />
         </View>
@@ -154,7 +192,7 @@ class Add extends Component {
         	</Touchable>
            <TextInput
             placeholder="请输入上课地点"
-            value={this.state.course.place}
+            value={this.state.place}
             style={[styles.input_box]}
             />
         </View>
@@ -218,48 +256,66 @@ class Add extends Component {
             </View>
             </View>
         </Modal>
-        <Modal ref="timeModal">
+        <Modal ref="timeModal" contentStyle={[styles.modal]}>
           <View style={[styles.modal_header, styles.center]}>
-              <Touchable onPress={this.hideWeek}>
-            <Text style={[styles.purple_text]}>取消</Text>
+              <Touchable onPress={this.hideTime}>
+            	<Text style={[styles.purple_text]}>取消</Text>
              </Touchable>
-            <Touchable onPress={this.confirmWeek}>
-             <Text style={[styles.purple_text]}>确认</Text>
-          	</Touchable>
+             <Touchable onPress={this.hideTime}>
+              <Text style={[styles.purple_text]}>确认</Text>
+          	 </Touchable>
           </View>
-          <View>
-              <View>
-              <ScrollView
+          <View style={[styles.center, styles.time_cont]}>
+            <ScrollView
                 ref={(scrollView) => {
                   this.WeekScrollView = scrollView;
                 }}
-                
+                style={[styles.time_scroll, styles.equal_div]}
               >
-                {weekdays.map((day, index) => {
-
+                {this.weekdays.map((day, index) => {
+                return(
+                  <Touchable onPress={() => {this.chooseDay(day, index)}} 
+                    style={this.state.day == day ? [styles.choosed, styles.time_item, styles.center] : [styles.time_item, styles.center]}>
+                  	<Text>{day}</Text>
+                  </Touchable>
+                  )
                 })}
               </ScrollView>
               <ScrollView
                 ref={(scrollView) => {
                   this.StartScrollView = scrollView;
                 }}
+                style={[styles.time_scroll, styles.equal_div]}
               >
-                {this.timeArr.map()}
+                {this.timeArr.map((item, index) => {
+                  return(
+                    <Touchable onPress={() => {this.chooseStart(item, index)}} 
+                      style={this.state.startTime == item ? [styles.choosed, styles.time_item, styles.center] : [styles.time_item, styles.center]}>
+                      <Text>{item}</Text>
+                    </Touchable>
+                    )
+                })}
               </ScrollView>
               <ScrollView
                 ref={(scrollView) => {
                   this.EndScrollView = scrollView;
                 }}
+                style={[styles.time_scroll, styles.equal_div]}
               >
-                {this.timeArr.map()}
+                {this.timeArr.map((item, index) => {
+                  return(
+                    <Touchable onPress={() => {this.chooseEnd(item, index)}} 
+                      style={this.state.endTime == item ? [styles.choosed, styles.time_item, styles.center] : [styles.time_item, styles.center]}> 
+                      <Text>到 {item}</Text>
+                    </Touchable>
+                    )
+                })}
               </ScrollView>
-              </View>
           </View>
         </Modal>
       </View>
     )
   }
 }
-
 
 export default Add;
