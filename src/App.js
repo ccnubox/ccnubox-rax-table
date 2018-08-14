@@ -12,106 +12,15 @@ import PanResponder from 'universal-panresponder';
 import TableService from './services/table';
 import Modal from 'rax-modal';
 import Link from 'rax-link';
+import Dropdown from "../box-ui/common/dropdown-list/index";
 
-const { View: AnimatedView } = Animated;
-
-class Dropdown extends Component {
-  constructor(props) {
-    super(props);
-    this.fadeAnim = new Animated.Value(0);
-  }
-
-  static propTypes = {
-    onHide: PropTypes.func,
-    onShow: PropTypes.func,
-    visible: PropTypes.bool
-  };
-
-  static defaultProps = {
-    visible: false
-  };
-
-  state = {
-    visible: false
-  };
-
-  animated(state, callback) {
-    const { visible, value } = state;
-    Animated.timing(this.fadeAnim, { toValue: visible === true ? 1 : 0 }).start(
-      callback
-    );
-  }
-
-  show() {
-    const currentState = { visible: true };
-    this.setState(currentState, () =>
-      this.animated(
-        currentState,
-        () => this.props.onShow && this.props.onShow(currentState)
-      )
-    );
-  }
-
-  hide() {
-    const currentState = { visible: false };
-    this.animated(currentState, () =>
-      this.setState(
-        currentState,
-        () => this.props.onHide && this.props.onHide(currentState)
-      )
-    );
-  }
-
-  toggle(visible) {
-    if (visible) {
-      this.show();
-    } else {
-      this.hide();
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (
-      nextProps.visible != this.props.visible &&
-      nextProps.visible != this.state.visible
-    ) {
-      this.toggle(nextProps.visible);
-    }
-  }
-
-  componentWillMount() {
-    this.setState({
-      visible: this.props.visible
-    });
-  }
-
-  componentDidMount() {
-    this.animated(this.state);
-  }
-
-  render() {
-    const { children } = this.props;
-    const { visible } = this.state;
-    return (
-      visible && (
-        <AnimatedView
-          onClick={() => {
-            this.hide();
-          }}
-        >
-          <Touchable>{children}</Touchable>
-        </AnimatedView>
-      )
-    );
-  }
-}
-
- var initWeek = 1;
+var initWeek = 1;
+var startTerm = new Date(2018, 8, 1);
 
 class Header extends Component {
   constructor(props) {
     super(props);
-    this.WeekOptions =  ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九","二十"];
+    this.WeekOptions =  ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九","二十", "二十一", "二十二", "二十三", "二十四"];
     this.state = {
       currentWeek: initWeek, // 当前周
       choosedWeek: initWeek, // 设为当前周
@@ -158,14 +67,12 @@ class Header extends Component {
     return (
       <View>
         <View style={[styles.header, styles.center]}>
-        <Touchable onPress={this.refresh}  style={styles.header_refresh}>
-          <Text style={[styles.fresh_text]}>刷新课表</Text>
-        </Touchable>
           <Touchable
             onPress={this.showWeekModal}
             style={[styles.choose_label, styles.center]}
           >
-            <Text style={styles.choose_text}>第{this.state.choosedWeek}周</Text>
+            {startTerm < new Date.now() ? 
+            <Text style={styles.choose_text}>未开学</Text> : <Text style={styles.choose_text}>第{this.state.choosedWeek}周</Text>}
             <Image
               style={styles.down_triangle}
               source={require("./assets/triangle_down.png")}
@@ -305,6 +212,7 @@ class Table extends Component {
   };
   
   getCourse = () => {
+    alert("get")
     var _CourseArray = new Array(7);
     for (let i = 0; i < 7; i++) {
       _CourseArray[i] = new Array(14);
@@ -334,8 +242,8 @@ class Table extends Component {
   }
   _updateLeft() {
     let LeftTemp = this._tableStyles.style.left;
-    if (LeftTemp > 80) {LeftTemp = 80;} 
-    if (LeftTemp < -50) {LeftTemp = -50;}
+    if (LeftTemp > 80) {LeftTemp = 80} 
+    if (LeftTemp < -50) {LeftTemp = -50}
     
     this.setState({
       left: LeftTemp
@@ -386,6 +294,7 @@ class Table extends Component {
       </View>
     )
   };
+
   orderList = (item) => {
     return(
       <View style={[styles.order_grid, styles.order_width, styles.grid_height, styles.center]}>
@@ -411,21 +320,6 @@ class Table extends Component {
       return true
     }
     return false;
-  };
-
-  renderGrids = (column, index) => {
-      return (
-        <View style={day == index ?  [styles.lesson_column, styles.grid_today] : [styles.lesson_column, styles.grid_width]}>
-          {
-            column.map((item) => {
-              return (
-                <View style={index == day ? [styles.daily_lesson, styles.grid_today, styles.grid_height] : [styles.daily_lesson, styles.grid_width, styles.grid_height]}>
-                </View>
-              )
-            })
-          }
-      </View>
-      )
   };
   
   hasCourse = (arr, week) => { // 查看是否有重叠时间的课
@@ -560,8 +454,11 @@ class App extends Component {
   render() {
     return (
       <View style={styles.app}>
-        <Table currentWeek = {this.state.currentWeek}></Table>
+        <Table ref="table" currentWeek = {this.state.currentWeek}></Table>
         <Header changeWeek = {(week) => this.changeWeektoTable(week)}></Header>
+        <Touchable onPress={() => {this.refs.table.getCourse()}}  style={styles.header_refresh}>
+          <Text style={[styles.fresh_text]}>刷新课表</Text>
+        </Touchable>
       </View>
     );
   }

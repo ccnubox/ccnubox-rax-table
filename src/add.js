@@ -145,7 +145,13 @@ class Add extends Component {
     })
     this.EndScrollView.scrollTo({y: (index - 2) * 80})
   };
-
+  confirmTime = () => {
+    if (this.state.startTime > this.state.endTime) {
+      this.refs.tipModal.show();
+    } else {
+      this.refs.timeModal.hide();
+    }
+  }
   confirmAdd = () => {
     let course = {
       course: this.state.course,
@@ -261,7 +267,7 @@ class Add extends Component {
               <Touchable onPress={this.hideTime}>
             	<Text style={[styles.purple_text]}>取消</Text>
              </Touchable>
-             <Touchable onPress={this.hideTime}>
+             <Touchable onPress={this.confirmTime}>
               <Text style={[styles.purple_text]}>确认</Text>
           	 </Touchable>
           </View>
@@ -312,6 +318,15 @@ class Add extends Component {
                 })}
               </ScrollView>
           </View>
+        </Modal>
+        <Modal ref="tipModal" contentStyle={[styles.tip_modal]}>
+          <View>
+            <Text>提示</Text>
+            <Text>请输入正确的时间</Text>
+          </View>
+          <Touchable>
+            <Text>确定</Text>
+          </Touchable>
         </Modal>
       </View>
     )
