@@ -21,9 +21,9 @@ class Add extends Component {
       day: "",
       during: 2, 
       place: "", 
-      day: "星期三",
-      startTime: 3,
-      endTime: 3,
+      day: "",
+      startTime: -1,
+      endTime: -1,
       weeksArray: [],
       weekMap: [],
       weekVisible: false,
@@ -154,14 +154,14 @@ class Add extends Component {
   }
   confirmAdd = () => {
     let course = {
-      course: this.state.course,
-      teacher: this.state.teacher,
-      weeks: this.state.weeksArray.toString(),
-      day: this.state.day,
-      start: this.state.startTime,
-      during: this.state.endTime - this.state.startTime + 1,
-      place: this.state.place,
-      remind: false
+      "course": this.state.course,
+      "teacher": this.state.teacher,
+      "weeks": this.state.weeksArray.toString(),
+      "day": this.state.day,
+      "start": this.state.startTime,
+      "during": this.state.endTime - this.state.startTime + 1,
+      "place": this.state.place,
+      "remind": false
     }
     TableService.addLesson(big, sid, jid, password, course).then(res => {
       // 跳转到 index
@@ -190,11 +190,11 @@ class Add extends Component {
         </View>
         <Text style={[styles.time]}>上课时间</Text>
         <View style={[styles.box, styles.time_box]}>
-          <Touchable  onPress={this.showWeek} style={[styles.input_box]} OnClick = {() => {this.showWeek}}>
-            <Text style={[styles.input_word, styles.center]}>选择上课周次</Text>
+          <Touchable  onPress={this.showWeek} style={[styles.input_box, styles.time_choose]}>
+            <Text style={[styles.input_word, styles.center, styles.time_word]}>选择上课周次</Text>
         	</Touchable>
-          <Touchable  onPress={this.showTime} style={[styles.input_box]} OnClick = {() => {this.showTime}}>
-            <Text style={[styles.input_word, styles.center]}>选择上课时间</Text>
+          <Touchable  onPress={this.showTime} style={[styles.input_box, styles.time_choose]}>
+            <Text style={[styles.input_word, styles.center, styles.time_word]}>选择上课时间</Text>
         	</Touchable>
            <TextInput
             placeholder="请输入上课地点"
@@ -319,12 +319,12 @@ class Add extends Component {
               </ScrollView>
           </View>
         </Modal>
-        <Modal ref="tipModal" contentStyle={[styles.tip_modal]}>
-          <View>
+        <Modal ref="tipModal" contentStyle={[styles.tip_modal, styles.column_center]}>
+          <View style={[styles.column_center, styles.modal_title]}>
             <Text>提示</Text>
-            <Text>请输入正确的时间</Text>
+            <Text style={styles.tip_content}>请输入正确的时间</Text>
           </View>
-          <Touchable>
+          <Touchable onPress={() => {this.refs.tipModal.hide()}} style={[styles.column_center, styles.confirm]}>
             <Text>确定</Text>
           </Touchable>
         </Modal>

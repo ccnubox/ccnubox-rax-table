@@ -14,7 +14,7 @@ import Modal from 'rax-modal';
 import Link from 'rax-link';
 import Dropdown from "../box-ui/common/dropdown-list/index";
 
-var initWeek = 1;
+var initWeek = 0;
 var startTerm = new Date(2018, 8, 1);
 
 class Header extends Component {
@@ -26,7 +26,8 @@ class Header extends Component {
       choosedWeek: initWeek, // 设为当前周
       showsVerticalScrollIndicator: false,
       isShow: false,
-      confirm: false
+      confirm: false,
+      termBegin: false
     };
   }
 
@@ -49,7 +50,8 @@ class Header extends Component {
   confirmChange = () => {
     this.setState({
       currentWeek: this.state.choosedWeek,
-      confirm: true
+      confirm: true,
+      termBegin: true
     });
     this.props.changeWeek(this.state.currentWeek);
     this.refs.weekModal.hide();
@@ -58,10 +60,18 @@ class Header extends Component {
   choosingWeek = (index) => {
     this.setState({
       choosedWeek: index + 1,
-      confirm: false
+      confirm: false,
+      termBegin: true
     });
     this.props.changeWeek(this.state.choosedWeek);
   };
+
+  termBegan = () => {
+    this.setState({
+      termBegin: false,
+      choosedWeek: 0
+    })
+  }
 
   render() {
     return (
@@ -71,7 +81,7 @@ class Header extends Component {
             onPress={this.showWeekModal}
             style={[styles.choose_label, styles.center]}
           >
-            {startTerm < new Date.now() ? 
+            {startTerm > Date.now() && this.state.choosedWeek === 0 ? 
             <Text style={styles.choose_text}>未开学</Text> : <Text style={styles.choose_text}>第{this.state.choosedWeek}周</Text>}
             <Image
               style={styles.down_triangle}
@@ -93,6 +103,13 @@ class Header extends Component {
                 }}
                 style={styles.dropdown_list}
               >
+              {startTerm > Date.now() && 
+                <View style={styles.option_container}>
+                  <View onClick={() => {this.termBegan()}} 
+                        style={this.state.termBegin ? [styles.option_item, styles.center] : [styles.choosing_option_item, styles.center, styles.option_item]}>
+                    <Text style={styles.option_text}>未开学</Text>
+                  </View>
+                </View>}
                 {this.WeekOptions.map((item, index) => {
                   return (
                     <View style={styles.option_container}>
@@ -212,7 +229,6 @@ class Table extends Component {
   };
   
   getCourse = () => {
-    alert("get")
     var _CourseArray = new Array(7);
     for (let i = 0; i < 7; i++) {
       _CourseArray[i] = new Array(14);
@@ -224,12 +240,12 @@ class Table extends Component {
     }
     TableService.getTableList().then((res) => {
       res.map((lesson) => {
-        let i = weekDay[lesson.day];
+        let i = this.weekDay[lesson.day];
         let start = parseInt(lesson.start);
         let during = parseInt(lesson.during);
         
         for (let j = start; j < during + start; j++) {
-          if(CourseArray[i][j - 1] == undefined){
+          if(_CourseArray[i][j - 1] == undefined){
           _CourseArray[i][j - 1] = []
         }
           _CourseArray[i][j - 1].push(lesson)
@@ -334,6 +350,17 @@ class Table extends Component {
       } 
     })
     return result;
+  };
+
+  showDelete = (id) => {
+    this.refs.deleteModal.show()
+  }
+
+  deleteCourse = (id) => {
+    TableService.deleteCourse(id).then(res => {
+      // 
+    })
+    this.refs.deleteModal.hide()
   }
 
   render() {
@@ -363,7 +390,8 @@ class Table extends Component {
                         position: 'absolute',
                         top: (parseInt(item.start) - 1) * 100,
                       }]}>
-                        <View onClick = {() => {this.showLesson(list)}} style={styles.item_center}>
+                        <View onPress = {() => {this.showLesson(list)}} 
+                              onLongPress = {() => this.showDelete(item.id)}  style={styles.item_center}>
                             <View style={[styles.item_center, styles.lesson_item, {
                                   backgroundColor: flag ? this.colors[parseInt(item.color)] : this.grey,
                                   width: index == day ? 188 : 88
@@ -394,6 +422,14 @@ class Table extends Component {
                           </Touchable>
                         )
                         })}
+                        </Modal>
+                        <Modal ref="deleteModal" contentStyle={[styles.deletem_odal]}>
+                          <Touchable onPress={() => this.deleteCourse(item.id)}>
+                            <Text>删除课程</Text>
+                          </Touchable>
+                          <Touchable onPress={() => this.refs.deleteModal.hide()}>
+                            <Text>取消</Text>
+                          </Touchable>
                         </Modal>
                       </View>
                     )}

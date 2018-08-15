@@ -109,3 +109,34 @@
   border-top: 2 solid #efeff4;
   border-bottom: 2 solid #efeff4;
 }
+.tip_modal {
+  width: 490;
+  height: 230;
+  position: absolute;
+  top: 500;
+  left: 130;
+  border-radius: 20;
+}
+.column_center {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.modal_title {
+  height: 134;
+  border-bottom: 1 solid #efeff4;
+  width: 490;
+}
+.tip_content {
+  font-size: 20;
+}
+.confirm {
+  height: 95;
+  width: 490;
+}
+.time_word {
+  color: #999999;
+}
+.time_choose {
+  justify-content: center;
+}
