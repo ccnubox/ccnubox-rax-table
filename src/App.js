@@ -1,4 +1,4 @@
-import { createElement, Component, PropTypes } from "rax";
+import { createElement, Component, PropTypes, setNativeProps } from "rax";
 import View from "rax-view";
 import Text from "rax-text";
 import styles from "./App.css";
@@ -261,9 +261,16 @@ class Table extends Component {
     if (LeftTemp > 80) {LeftTemp = 80} 
     if (LeftTemp < -50) {LeftTemp = -50}
     
-    this.setState({
-      left: LeftTemp
-    });
+    // this.setState({
+    //   left: LeftTemp
+    // });
+    this._tableStyles.style.left = LeftTemp;
+    setNativeProps(this.table, {
+      style: {
+        left: LeftTemp,
+        top: this._tableStyles.style.top,
+      }
+    })
     this.scrollView.scrollTo({x: 80 - LeftTemp})
   };
   
@@ -271,9 +278,16 @@ class Table extends Component {
     let TopTemp = this._tableStyles.style.top;
     if (TopTemp > 170) { TopTemp = 170; }
     if (TopTemp < -200) { TopTemp = -200; }
-    this.setState({
-      top: TopTemp
-    });
+    // this.setState({
+    //   top: TopTemp
+    // });
+    this._tableStyles.style.top = TopTemp
+    setNativeProps(this.table, {
+      style: {
+        left: this._tableStyles.style.left,
+        top: this._tableStyles.style.top,
+      }
+    })
   };
 
   _handleStartShouldSetPanResponder (e, gestureState) {
@@ -366,10 +380,7 @@ class Table extends Component {
   render() {
     return (
       <View>
-        <View style={[styles.lesson_table, {
-            top: this.state.top,
-            left: this.state.left
-          }]}
+        <View style={[styles.lesson_table, this._tableStyles.style]}
           ref={(table) => {
             this.table = table;
           }} 

@@ -172,9 +172,9 @@
 }
 
 .daily_lesson {
-  border-bottom: 1 solid #F0F0F1;
+  border-bottom: 2px solid #F0F0F1;
   background-color: #ffffff;
-  border-right: 1 solid #F0F0F1;
+  border-right: 2px solid #F0F0F1;
 }
 
 .lesson_item {
