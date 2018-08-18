@@ -58,20 +58,24 @@
 .list_container {
   border-radius: 20;
   width: 250;
-  border-left: 1 solid #efeff4;
-  border-bottom: 1 solid #efeff4;
-  border-right: 1 solid #efeff4;
+  background-color: #ffffff;
+  border-left: 2 solid #efeff4;
+  border-bottom: 2 solid #efeff4;
+  border-right: 2 solid #efeff4;
 }
 
 .option_text, .week_text, .daily_lesson {
   color: #434343;
 }
 
+.option_size {
+  font-size: 30;
+}
 .set_button {
   background-color: #6767fa;
   color: #ffffff;
   width: 200;
-  border-radius: 5;
+  border-radius: 15;
   margin: 10 0;
 }
 
@@ -86,8 +90,13 @@
   padding: 0 20;
 }
 
+.dropdown_center {
+  align-items: center;
+  justify-content: flex-end;
+  flex-direction: row;
+}
 .option_item {
-  border-bottom: 1 solid #efeff4;
+  border-bottom: 2 solid #efeff4;
 }
 
 .button_text,
@@ -95,15 +104,14 @@
   padding: 10 0;
 }
 
-.choosing_option_item {
-  background-color: rgb(207, 208, 209);
-}
-
 .current {
   color: #f6b37f;
   font-size: 20;
+  margin-left: 8;
 }
-
+.equal_item {
+  flex: 1;
+}
 .grid_width {
   width: 100;
 }
@@ -129,10 +137,9 @@
   top: 90;
 }
 .week_data {
- width: 650;
+  width: 650;
   height: 80;
 }
-
 
 .column {
   display: flex;
@@ -163,7 +170,6 @@
   flex-direction: column;
 }
 
-
 .grid_border {
   height: 100;
 }
@@ -192,10 +198,15 @@
 }
 
 .item_center {
-  align-items: center;
   justify-content: center;
+}
+
+.item_center, 
+.lesson_grid_center {
+  align-items: center;
   flex-direction: column;
 }
+
 .font {
   font-size: 16;
 }

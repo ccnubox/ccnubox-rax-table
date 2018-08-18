@@ -10,6 +10,7 @@ import Image from "rax-image";
 import ScrollView from "rax-scrollview";
 import TextInput from 'rax-textinput';
 import Modal from 'rax-modal';
+import Link from 'rax-link';
 
 class Add extends Component {
   constructor(props) {
@@ -171,7 +172,9 @@ class Add extends Component {
     return (
       <View style={styles.app}>
         <View style={[styles.header, styles.flex_row ]}>
-          <Text style={[styles.header_text, styles.table]}>课程表</Text>
+          <Link href="http://10.193.44.188:9999/js/index.bundle.js?_wx_tpl=http://10.193.44.188:9999/js/index.bundle.js"
+              style={[styles.header_text, styles.table]}>课程表
+          </Link>
           <Touchable onPress={() => {this.confirmAdd}}>
             <Text style={[styles.header_text, styles.header_finsh]}>完成</Text>
           </Touchable>
@@ -213,44 +216,41 @@ class Add extends Component {
               </View>
            <View style={[styles.choose_cont, styles.center]}>
              <View style={[styles.choose_week]}>
-             	<View style={[styles.border_bottom, styles.table_header, styles.table_row, styles.row_height, styles.center, {
+             	<View style={[styles.table_header, styles.table_row, styles.row_height, styles.center, {
                        backgroundColor: this.state.choosingOdd ? '#6767fa' : '#ffffff'
                      }]}>
                  <Touchable onPress={this.chooseOddWeeks} style={[styles.equal_div, styles.center, styles.border_right]}>
-                   <View style={[styles.table_row, styles.center]}>
-            		<Text style={[{color: this.state.choosingOdd ? '#ffffff' : '#6767fa'}]}>单周</Text>
-                     </View>
+                    <View style={[styles.table_row, styles.center]}>
+            		      <Text style={[{color: this.state.choosingOdd ? '#ffffff' : '#6767fa'}]}>单周</Text>
+                    </View>
                  </Touchable>
                <Touchable onPress={this.chooseEvenWeeks} style={[styles.equal_div, styles.center, styles.border_right, {
                        backgroundColor: this.state.choosingEven ? '#6767fa' : '#ffffff'
                      }]}>
-                 <View style={[styles.table_row, styles.center]}>
-              <Text style={[{color: this.state.choosingEven ? '#ffffff' : '#6767fa'}]}>双周</Text>
-                    </View>
+                  <View style={[styles.table_row, styles.center]}>
+                    <Text style={[{color: this.state.choosingEven ? '#ffffff' : '#6767fa'}]}>双周</Text>
+                  </View>
                </Touchable>
                <Touchable onPress={this.chooseAllWeeks} style={[styles.equal_div, styles.center, styles.row_height, {
                        backgroundColor: this.state.choosingAll ? '#6767fa' : '#ffffff'
                      }]}>
-                <View style={[styles.table_row, styles.center]}>
-                 <Text style={[{color: this.state.choosingAll ? '#ffffff' : '#6767fa'}]}>全选</Text>
+                  <View style={[styles.table_row, styles.center]}>
+                    <Text style={[{color: this.state.choosingAll ? '#ffffff' : '#6767fa'}]}>全选</Text>
                   </View>
                </Touchable>
                </View>
-               <View>
+               <View style={[styles.border_left]}>
                  {this.weeks.map((row, rowIndex) => {
                    return (
-                     <View style={rowIndex != 3 ? [styles.table_row, styles.border_bottom, styles.center] : [styles.table_row, styles.center]}>
+                     <View style={[styles.table_row, styles.center]}>
                        { row.map((item, itemIndex) => {
                        return (
-                         <Touchable onPress={() => {this.chooseOneWeek(item - 1)}} style={itemIndex != 5 ? 
-                             [styles.border_right, styles.equal_div, styles.center, {
-                       			backgroundColor: this.state.weekMap[item - 1] ? '#feb75a' : '#ffffff'
-                     		  }] : [styles.equal_div, styles.center, {
-                       				backgroundColor: this.state.weekMap[item - 1] ? '#feb75a' : '#ffffff'
-                     				}]}>
-                       	 	<View style={[styles.table_row, styles.center]}>
+                         <Touchable onPress={() => {this.chooseOneWeek(item - 1)}} 
+                         style={
+                            [styles.border_right, styles.equal_div, styles.row_item, {
+                       			  backgroundColor: this.state.weekMap[item - 1] ? '#feb75a' : '#ffffff'
+                     		  }]}>
                            <Text>{item}</Text>   
-                        	</View>
                         </Touchable>    
                        )
                      }

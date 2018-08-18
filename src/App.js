@@ -20,7 +20,7 @@ var startTerm = new Date(2018, 8, 1);
 class Header extends Component {
   constructor(props) {
     super(props);
-    this.WeekOptions =  ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九","二十", "二十一", "二十二", "二十三", "二十四"];
+    this.WeekOptions = [];
     this.state = {
       currentWeek: initWeek, // 当前周
       choosedWeek: initWeek, // 设为当前周
@@ -29,6 +29,11 @@ class Header extends Component {
       confirm: false,
       termBegin: false
     };
+  }
+  componentWillMount() {
+    for (let i = 1; i <= 24; i++) {
+      this.WeekOptions.push(i);
+    }
   }
 
   showWeekModal = () => {
@@ -69,6 +74,7 @@ class Header extends Component {
   termBegan = () => {
     this.setState({
       termBegin: false,
+      currentWeek: 0,
       choosedWeek: 0
     })
   }
@@ -105,32 +111,37 @@ class Header extends Component {
               >
               {startTerm > Date.now() && 
                 <View style={styles.option_container}>
-                  <View onClick={() => {this.termBegan()}} 
-                        style={this.state.termBegin ? [styles.option_item, styles.center] : [styles.choosing_option_item, styles.center, styles.option_item]}>
+                  <Touchable onPress={() => {this.termBegan()}} 
+                        style={ [styles.option_item, styles.center, {
+                          backgroundColor: this.state.termBegin ?  '#ffffff' : '#D7D8D9'
+                        }]}>
+                    {this.state.currentWeek === 0 &&  <View style={[styles.equal_item]}></View>}
                     <Text style={styles.option_text}>未开学</Text>
-                  </View>
+                    {this.state.currentWeek === 0 &&  <Text style={[styles.equal_item, styles.font, styles.current]}>当前</Text>}
+                  </Touchable>
                 </View>}
                 {this.WeekOptions.map((item, index) => {
                   return (
                     <View style={styles.option_container}>
                       <View
-                        style={this.state.choosedWeek == index + 1 ? [styles.choosing_option_item, styles.center, styles.option_item] : [styles.option_item, styles.center]}
+                        style={ [styles.center, styles.option_item, {
+                          backgroundColor: this.state.choosedWeek == index + 1 ? '#D7D8D9' : '#ffffff'
+                        }]}
                         onClick={() => {
                           this.choosingWeek(index);
                         }}
-                      >
-                        <Text style={styles.option_text}>
-                        第{this.WeekOptions[index]}周
-                        </Text>
-                          {this.state.currentWeek == index + 1 &&  <Text style={[styles.font, styles.current]}>当前</Text>}
+                      > 
+                        {this.state.currentWeek == index + 1 &&  <View style={[styles.equal_item]}></View>}
+                        <Text style={[styles.option_text, styles.option_size]}>第{this.WeekOptions[index]}周</Text>
+                          {this.state.currentWeek == index + 1 &&  <Text style={[styles.equal_item, styles.font, styles.current]}>当前</Text>}
                       </View>
                     </View>
                   )
                 })}
               </ScrollView>
-              <View style={styles.center}>
+              <View style={[styles.center]}>
                 <Button onPress={() => this.confirmChange()} style={[styles.set_button, styles.center]}>
-                  <Text style={[styles.button_text]}>设为当前周</Text>
+                  <Text style={[styles.button_text, styles.option_size]}>设为当前周</Text>
                 </Button>
               </View>
             </View>
@@ -234,7 +245,7 @@ class Table extends Component {
   };
   
   getCourse = () => {
-    var _CourseArray = new Array(7);
+    let _CourseArray = new Array(7);
     for (let i = 0; i < 7; i++) {
       _CourseArray[i] = new Array(14);
     }
@@ -387,8 +398,9 @@ class Table extends Component {
   }
 
   deleteCourse = (id) => {
-    TableService.deleteCourse(id).then(res => {
+    TableService.deleteLesson(id).then(res => {
       this.refs.deleteModal.hide()
+      this.getCourse()
     })
   }
 
@@ -422,7 +434,12 @@ class Table extends Component {
                           delayPressOut={1000}
                           delayLongPress={800}
                           onLongPress = {() => this.showDelete(item.id)}
-                          style={styles.item_center}>
+                          style={[styles.lesson_grid_center, {
+                            justifyContent: list.length > 1 ? 'space-between' : 'center',
+                            height: parseInt(item.during) * 100
+                          }]}>
+                          { list.length > 1 && <View></View>}
+                          <View>
                             <View style={[styles.item_center, styles.lesson_item, {
                                   backgroundColor: flag ? this.colors[parseInt(item.color)] : this.grey,
                                   width: index == day ? 188 : 88
@@ -430,12 +447,13 @@ class Table extends Component {
                               {flag ? 
                                 <Text style={[styles.course_text, styles.font]}>{item.course}</Text>  
                                 :  <Text style={[styles.course_text, styles.font]}>{item.course}(非本周)</Text>}                            
-                              </View>
-                              <View style={[styles.item_center, styles.course_info]}>
-                                <Text style={[styles.font]}>{item.teacher}</Text>
-                                <Text style={[styles.font, styles.grey_font]}>@{item.place}</Text>
-                              </View>
-                              { list.length > 1 && <View style={[styles.more]}></View>}
+                            </View>
+                            <View style={[styles.item_center, styles.course_info]}>
+                              <Text style={[styles.font]}>{item.teacher}</Text>
+                              <Text style={[styles.font, styles.grey_font]}>@{item.place}</Text>
+                            </View>
+                          </View>
+                          { list.length > 1 && <View style={[styles.more]}></View>}
                         </Touchable>
                         <Modal ref="lesson" contentStyle={[styles.lesson_modal, {
                             height: 200 * this.state.courseList.length - 50

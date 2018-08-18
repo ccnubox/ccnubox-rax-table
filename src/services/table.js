@@ -40,15 +40,22 @@ const TableService = {
       body: data
     });
   },
-  deleteLesson(big, sid, jid, password, id) {
+  deleteLesson(id) {
     return request({
       method: "DELETE",
       url: "https://ccnubox.muxixyz.com/api/table/" + id + "/",
+      // headers: {
+      //   'Bigipserverpool': big,
+      //   'Sid': sid,
+      //   'Jsessionid': jid,
+      //   'Authorization': "Basic " + btoa(sid + ":" + password)
+      // }
       headers: {
-        'Bigipserverpool': big,
-        'Sid': sid,
-        'Jsessionid': jid,
-        'Authorization': "Basic " + btoa(sid + ":" + password)
+        'Accept': 'application/json',
+        'Bigipserverpool': "89172160.20480.0000",
+        'Sid': "2016210773",
+        'Jsessionid': "0353EA4BBA48F76FDD41C36A52F10898",
+        'Authorization': "Basic MjAxNjIxMDc3MzowMzA2MTAxNDkwY3J5"
       }
     });
   }

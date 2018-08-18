@@ -70,21 +70,29 @@
 }
 .choose_week {
   width: 480;
-  height: 395;
-  border: 2 solid #ccccff;
+  height: 400;
 }
 .purple_text {
   color: #6767fa;
+}
+.table_header {
+  width: 480;
+  border: 2 solid #ccccff;
 }
 .table_row {
   flex-direction: row;
   height: 78;
 }
-
+.border_left {
+  border-left: 2 solid #ccccff;
+}
 .equal_div {
   flex: 1;
+  justify-content: center;
+  align-items:center;
 }
-.border_bottom {
+.row_item {
+  height: 78;
   border-bottom: 2 solid #ccccff;
 }
 .border_right {
