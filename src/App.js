@@ -308,19 +308,27 @@ class Table extends Component {
 
   _handlePanResponderMove = (e, gestureState) => {
     if (Math.abs(gestureState.dy) >= Math.abs(gestureState.dx)) {
-      this._tableStyles.style.top = this._previousTop + gestureState.dy;
-      this._updateTop();
+      if (!(this._tableStyles.style.top == -200 && gestureState.dy < 0) && !(this._tableStyles.style.top == 170 && gestureState.dy > 0)) {
+        this._tableStyles.style.top = this._previousTop + gestureState.dy;
+        this._updateTop();
+      }
     } else {
-      this._tableStyles.style.left = this._previousLeft + gestureState.dx;
-      this._updateLeft();
+      if (!(this._tableStyles.style.left == -50 && gestureState.dx < 0) && !(this._tableStyles.style.left == 80 && gestureState.dx > 0)) {
+        this._tableStyles.style.left = this._previousLeft + gestureState.dx;
+        this._updateLeft();
+      }
     }
   };
 
   _handlePanResponderEnd = (e, gestureState) => {
     if (Math.abs(gestureState.dy) >= Math.abs(gestureState.dx)) {
-       this._previousTop += gestureState.dy;
+      if (!(this._tableStyles.style.top == -200 && gestureState.dy < 0) && !(this._tableStyles.style.top == 170 && gestureState.dy > 0)) {
+        this._previousTop += gestureState.dy;
+      }
     } else {
-      this._previousLeft += gestureState.dx;
+      if (!(this._tableStyles.style.left == -50 && gestureState.dx < 0) && !(this._tableStyles.style.left == 80 && gestureState.dx > 0)) {
+        this._previousLeft += gestureState.dx;
+      }
     }
   };
 
