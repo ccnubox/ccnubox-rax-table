@@ -138,7 +138,7 @@ class Header extends Component {
           </View>
           <View style={styles.add}>
             <Link
-              href="http://192.168.0.114:9999/js/second.bundle.js?_wx_tpl=http://192.168.0.114:9999/js/second.bundle.js"
+              href="http://10.193.44.188:9999/js/second.bundle.js?_wx_tpl=http://10.193.44.188:9999/js/second.bundle.js"
               style={[styles.fresh_text]}
             >
             添课
@@ -352,15 +352,14 @@ class Table extends Component {
     return result;
   };
 
-  showDelete = (id) => {
+  showDelete = () => {
     this.refs.deleteModal.show()
   }
 
   deleteCourse = (id) => {
     TableService.deleteCourse(id).then(res => {
-      // 
+      this.refs.deleteModal.hide()
     })
-    this.refs.deleteModal.hide()
   }
 
   render() {
@@ -382,7 +381,7 @@ class Table extends Component {
                   if(list.length > 0) {
                     let flag = this.hasCourse(list, this.props.currentWeek).flag;
                     let item = this.hasCourse(list, this.props.currentWeek).course;
-                    if (i == parseInt(item.start)) {
+                    // if (i == parseInt(item.start)) {
                     return (
                       <View style={ [styles.item_center, styles.daily_lesson, {
                         width: this.weekDay[item.day] == day ? 200 : 100,
@@ -390,8 +389,13 @@ class Table extends Component {
                         position: 'absolute',
                         top: (parseInt(item.start) - 1) * 100,
                       }]}>
-                        <View onPress = {() => {this.showLesson(list)}} 
-                              onLongPress = {() => this.showDelete(item.id)}  style={styles.item_center}>
+                        <Touchable
+                          onPress = {() => {this.showLesson(list)}}
+                          delayPressIn={400}
+                          delayPressOut={1000}
+                          delayLongPress={800}
+                          onLongPress = {() => this.showDelete(item.id)}
+                          style={styles.item_center}>
                             <View style={[styles.item_center, styles.lesson_item, {
                                   backgroundColor: flag ? this.colors[parseInt(item.color)] : this.grey,
                                   width: index == day ? 188 : 88
@@ -405,7 +409,7 @@ class Table extends Component {
                                 <Text style={[styles.font, styles.grey_font]}>@{item.place}</Text>
                               </View>
                               { list.length > 1 && <View style={[styles.more]}></View>}
-                            </View>
+                        </Touchable>
                         <Modal ref="lesson" contentStyle={[styles.lesson_modal, {
                             height: 200 * this.state.courseList.length - 50
                           }]}>
@@ -423,24 +427,25 @@ class Table extends Component {
                         )
                         })}
                         </Modal>
-                        <Modal ref="deleteModal" contentStyle={[styles.deletem_odal]}>
-                          <Touchable onPress={() => this.deleteCourse(item.id)}>
-                            <Text>删除课程</Text>
+                        <Modal ref="deleteModal" contentStyle={[styles.delete_modal, styles.item_center]}>
+                          <Touchable onPress={() => this.deleteCourse(item.id)} style={[styles.delete_course, styles.delete_button, styles.center]}>
+                            <Text style={[styles.delete_text, styles.confirm_delete]}>删除课程</Text>
                           </Touchable>
-                          <Touchable onPress={() => this.refs.deleteModal.hide()}>
-                            <Text>取消</Text>
+                          <Touchable onPress={() => this.refs.deleteModal.hide()} style={[styles.cancel_delete, styles.delete_button, styles.center]}>
+                            <Text style={[styles.delete_text, styles.cancel_text]}>取消</Text>
                           </Touchable>
                         </Modal>
                       </View>
-                    )}
-                  }
+                    )
+                  // }
+                  } else {
                     return (
                       <View style={[{ width: index == day ? 200 : 100,
                               position: 'absolute',
               				        top:  i * 100,
                             }, styles.daily_lesson, styles.grid_height]}> 
                       </View>)}
-                  
+                  }
                 )
             }
           </View>

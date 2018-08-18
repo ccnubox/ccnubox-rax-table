@@ -21,9 +21,9 @@ class Add extends Component {
       day: "",
       during: 2, 
       place: "", 
-      day: "",
-      startTime: -1,
-      endTime: -1,
+      day: "星期三",
+      startTime: 3,
+      endTime: 3,
       weeksArray: [],
       weekMap: [],
       weekVisible: false,
@@ -277,12 +277,18 @@ class Add extends Component {
                   this.WeekScrollView = scrollView;
                 }}
                 style={[styles.time_scroll, styles.equal_div]}
+                showsVerticalScrollIndicator={false}
               >
                 {this.weekdays.map((day, index) => {
                 return(
                   <Touchable onPress={() => {this.chooseDay(day, index)}} 
-                    style={this.state.day == day ? [styles.choosed, styles.time_item, styles.center] : [styles.time_item, styles.center]}>
-                  	<Text>{day}</Text>
+                    style={[styles.time_item, styles.center]}>
+                  	<Text style={{
+                          fontSize: this.state.day === day ? 35 : 30,
+                          color: this.state.day === day ? '#6767fa' : '#000000'
+                          }}>
+                      {day}
+                    </Text>
                   </Touchable>
                   )
                 })}
@@ -292,12 +298,16 @@ class Add extends Component {
                   this.StartScrollView = scrollView;
                 }}
                 style={[styles.time_scroll, styles.equal_div]}
+                showsVerticalScrollIndicator={false}
               >
                 {this.timeArr.map((item, index) => {
                   return(
                     <Touchable onPress={() => {this.chooseStart(item, index)}} 
-                      style={this.state.startTime == item ? [styles.choosed, styles.time_item, styles.center] : [styles.time_item, styles.center]}>
-                      <Text>{item}</Text>
+                    style={[styles.time_item, styles.center]}>
+                  	<Text style={{
+                          fontSize: this.state.startTime === item ? 35 : 30,
+                          color: this.state.startTime === item ? '#6767fa' : '#000000'
+                          }}>{item}</Text>
                     </Touchable>
                     )
                 })}
@@ -307,12 +317,16 @@ class Add extends Component {
                   this.EndScrollView = scrollView;
                 }}
                 style={[styles.time_scroll, styles.equal_div]}
+                showsVerticalScrollIndicator={false}
               >
                 {this.timeArr.map((item, index) => {
                   return(
                     <Touchable onPress={() => {this.chooseEnd(item, index)}} 
-                      style={this.state.endTime == item ? [styles.choosed, styles.time_item, styles.center] : [styles.time_item, styles.center]}> 
-                      <Text>到 {item}</Text>
+                    style={[styles.time_item, styles.center]}>
+                  	<Text style={{
+                          fontSize: this.state.endTime === item ? 35 : 30,
+                          color: this.state.endTime === item ? '#6767fa' : '#000000'
+                          }}>到 {item}</Text>
                     </Touchable>
                     )
                 })}
@@ -321,11 +335,11 @@ class Add extends Component {
         </Modal>
         <Modal ref="tipModal" contentStyle={[styles.tip_modal, styles.column_center]}>
           <View style={[styles.column_center, styles.modal_title]}>
-            <Text>提示</Text>
-            <Text style={styles.tip_content}>请输入正确的时间</Text>
+            <Text style={styles.bold_text}>提示</Text>
+            <Text style={styles.tip_content}>请输入正确的课程时间</Text>
           </View>
           <Touchable onPress={() => {this.refs.tipModal.hide()}} style={[styles.column_center, styles.confirm]}>
-            <Text>确定</Text>
+            <Text style={styles.blue_text}>确定</Text>
           </Touchable>
         </Modal>
       </View>

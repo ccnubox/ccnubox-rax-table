@@ -1,7 +1,4 @@
 .app {
-  /* flex: 1;
-  justify-content: center;
-  align-items: center; */
   background-color: #efeff4;
   width: 750;
   height: 1200;
@@ -243,4 +240,30 @@
   width: 20;
   height: 20;
   margin-left: 80;
+}
+.delete_modal {
+  height: 290;
+  width: 750;
+  background-color: transparent;
+  position: absolute;
+  left: 0;
+  top: 910;
+}
+.delete_button {
+  height: 120;
+  width: 710;
+  border-radius: 20;
+  background-color: #ffffff;
+}
+.delete_course {
+  margin-bottom: 15;
+}
+.confirm_delete {
+  color: #DD4A3E;
+}
+.cancel_text {
+  color: #4176FB;
+}
+.delete_text {
+  font-size: 35;
 }

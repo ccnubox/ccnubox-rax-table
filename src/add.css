@@ -105,9 +105,11 @@
   justify-content: center;
 }
 .choosed {
-  font-size: 40;
   border-top: 2 solid #efeff4;
   border-bottom: 2 solid #efeff4;
+}
+.choosed_text {
+  font-size: 35;
 }
 .tip_modal {
   width: 490;
@@ -128,7 +130,7 @@
   width: 490;
 }
 .tip_content {
-  font-size: 20;
+  font-size: 25;
 }
 .confirm {
   height: 95;
@@ -139,4 +141,10 @@
 }
 .time_choose {
   justify-content: center;
+}
+.blue_text {
+  color: #4176FB;
+}
+.bold_text {
+  font-weight: bold;
 }
