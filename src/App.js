@@ -221,6 +221,11 @@ class Table extends Component {
         top: this._previousTop
       }
     };
+    this._orderStyles = {
+      style: {
+        top: this._previousTop
+      }
+    }
   }
 
   componentDidMount () {
@@ -278,13 +283,16 @@ class Table extends Component {
     let TopTemp = this._tableStyles.style.top;
     if (TopTemp > 170) { TopTemp = 170; }
     if (TopTemp < -200) { TopTemp = -200; }
-    // this.setState({
-    //   top: TopTemp
-    // });
     this._tableStyles.style.top = TopTemp
+    this._orderStyles.style.top = TopTemp
     setNativeProps(this.table, {
       style: {
         left: this._tableStyles.style.left,
+        top: this._tableStyles.style.top,
+      }
+    })
+    setNativeProps(this.orderList, {
+      style: {
         top: this._tableStyles.style.top,
       }
     })
@@ -462,9 +470,8 @@ class Table extends Component {
           </View>
         )})}
         </View>
-        <View style={[styles.column, styles.grid_width,{
-                top: this.state.top
-              }] }>
+        <View ref={(orderList) => {this.orderList = orderList}}
+          style={[styles.column, styles.grid_width, this._orderStyles.style] }>
           {this.order.map(i => {
             return (
               <View style={[styles.order_grid,styles.order_width,styles.grid_height, styles.center]}>
