@@ -12,6 +12,7 @@ import PanResponder from 'universal-panresponder';
 import TableService from './services/table';
 import Modal from 'rax-modal';
 import Link from 'rax-link';
+// const native = require("@weex-module/test");
 import Dropdown from "../box-ui/common/dropdown-list/index";
 
 var initWeek = 0;
@@ -189,6 +190,21 @@ for (let i = 0; i < 7; i++) {
   }
 }
 
+
+
+const getEmptyCourseArray = () => {
+  let emptyCourseArray = new Array(7);
+for (let i = 0; i < 7; i++) {
+  emptyCourseArray[i] = new Array(14);
+}
+for (let i = 0; i < 7; i++) {
+  for (let j = 0; j < 14; j++) {
+    emptyCourseArray[i][j] = new Array();
+  }
+}
+return emptyCourseArray
+}
+
 class Table extends Component {
   constructor(props) {
     super(props);
@@ -210,12 +226,14 @@ class Table extends Component {
       left: 100,
       top: 170,
       courseList: [],
-      courseArray: []
+      courseArray: getEmptyCourseArray()
     }
-  }
-  
-  componentWillMount () {
-    this.getCourse();
+    this._tableStyles = {
+      style: {
+        left: this._previousLeft,
+        top: this._previousTop
+      }
+    };
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -226,12 +244,6 @@ class Table extends Component {
     });
     this._previousLeft = 80;
     this._previousTop = 170;
-    this._tableStyles = {
-      style: {
-        left: this._previousLeft,
-        top: this._previousTop
-      }
-    };
     this._orderStyles = {
       style: {
         top: this._previousTop
@@ -239,38 +251,61 @@ class Table extends Component {
     }
   }
 
+  reset = () => {
+    this.setState({
+      courseList: [],
+      courseArray: getEmptyCourseArray()
+    })
+  }
+  
+  componentWillMount () {
+    this.getCourse();
+  }
+
   componentDidMount () {
     this._updateLeft();
     this._updateTop();
   };
-  
-  getCourse = () => {
-    let _CourseArray = new Array(7);
-    for (let i = 0; i < 7; i++) {
-      _CourseArray[i] = new Array(14);
-    }
-    for (let i = 0; i < 7; i++) {
-      for (let j = 0; j < 14; j++) {
-        _CourseArray[i][j] = new Array();
+
+  setCourseArray = (res, _CourseArray) => {
+    res.map((lesson) => {
+      let i = this.weekDay[lesson.day];
+      let start = parseInt(lesson.start);
+      let during = parseInt(lesson.during);
+      
+      for (let j = start; j < during + start; j++) {
+        if(_CourseArray[i][j - 1] == undefined){
+        _CourseArray[i][j - 1] = []
       }
-    }
+        _CourseArray[i][j - 1].push(lesson)
+      }
+    })
+    return _CourseArray;
+  }
+
+  getCourseFromServer = () => {
+    let _CourseArray = this.state.courseArray;
     TableService.getTableList().then((res) => {
-      res.map((lesson) => {
-        let i = this.weekDay[lesson.day];
-        let start = parseInt(lesson.start);
-        let during = parseInt(lesson.during);
-        
-        for (let j = start; j < during + start; j++) {
-          if(_CourseArray[i][j - 1] == undefined){
-          _CourseArray[i][j - 1] = []
-        }
-          _CourseArray[i][j - 1].push(lesson)
-        }
+      // native.saveCachedTable(JSON.stringify(res))
+      this.setState({
+        courseArray: this.setCourseArray(res, _CourseArray)
       })
     })
-    this.setState({
-      CourseArray: _CourseArray
-    })
+  }
+  
+  getCourse = () => {
+    // native.getCachedTable((res) => {
+    //   if (res.code === "404") {
+    //     this.getCourseFromServer();
+    //   } else {
+    //     let _CourseArray = this.state.courseArray;
+    //     this.setState({
+    //       courseArray: this.setCourseArray(JSON.parse(res.result), _CourseArray)
+    //     })
+    //   }
+    // })
+
+    this.getCourseFromServer();
   }
   _updateLeft() {
     let LeftTemp = this._tableStyles.style.left;
@@ -413,7 +448,7 @@ class Table extends Component {
           }} 
           {...this._panResponder.panHandlers}
         >		
-          {this.state.CourseArray.map((column, index) => {
+          {this.state.courseArray.map((column, index) => {
             return (
               <View style={day == index ?  [styles.lesson_column, styles.grid_today] : [styles.lesson_column, styles.grid_width]}>
                 {column.map((list, i) => {
@@ -541,7 +576,7 @@ class App extends Component {
       <View style={styles.app}>
         <Table ref="table" currentWeek = {this.state.currentWeek}></Table>
         <Header changeWeek = {(week) => this.changeWeektoTable(week)}></Header>
-        <Touchable onPress={() => {this.refs.table.getCourse()}}  style={styles.header_refresh}>
+        <Touchable onPress={() => { this.refs.table.reset(); this.refs.table.getCourseFromServer()}}  style={styles.header_refresh}>
           <Text style={[styles.fresh_text]}>刷新课表</Text>
         </Touchable>
       </View>
