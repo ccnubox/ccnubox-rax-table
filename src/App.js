@@ -12,7 +12,7 @@ import PanResponder from "universal-panresponder";
 import TableService from "./services/table";
 import Modal from "rax-modal";
 import Link from "rax-link";
-const native = require("@weex-module/test");
+// const native = require("@weex-module/test");
 import Dropdown from "../box-ui/common/dropdown-list/index";
 
 var initWeek = 0;
@@ -35,31 +35,33 @@ class Header extends Component {
     for (let i = 1; i <= 24; i++) {
       this.WeekOptions.push(i);
     }
+    if (startTerm < Date.now()) {
+      this.setState({
+        termBegin: true
+      });
+    }
   }
 
   showWeekModal = () => {
-    if (!this.state.isShow) {
-      this.refs.weekModal.show();
-    } else {
-      this.refs.weekModal.hide();
-    }
     this.setState({
       isShow: !this.state.isShow
     });
   };
 
   hideWeekModal = () => {
-    this.refs.weekModal.hide();
+    this.setState({
+      isShow: false
+    });
   };
 
   confirmChange = () => {
     this.setState({
       currentWeek: this.state.choosedWeek,
       confirm: true,
-      termBegin: true
+      termBegin: true,
+      isShow: false
     });
     this.props.changeWeek(this.state.currentWeek);
-    this.refs.weekModal.hide();
   };
 
   choosingWeek = index => {
@@ -100,81 +102,42 @@ class Header extends Component {
               resizeMode="cover"
             />
           </Touchable>
-          <View style={styles.dropdown_container}>
-            <Dropdown ref="weekModal">
-              <Image
-                style={styles.up_triangle}
-                source={require("./assets/triangle_up.png")}
-                resizeMode="cover"
-              />
-              <View style={[styles.list_container]}>
-                <ScrollView
-                  ref={scrollView => {
-                    this.scrollView = scrollView;
-                  }}
-                  style={styles.dropdown_list}
-                >
-                  {startTerm > Date.now() && (
-                    <View style={styles.option_container}>
-                      <Touchable
-                        onPress={() => {
-                          this.termBegan();
-                        }}
-                        style={[
-                          styles.option_item,
-                          styles.center,
-                          {
-                            backgroundColor: this.state.termBegin
-                              ? "#ffffff"
-                              : "#D7D8D9"
-                          }
-                        ]}
-                      >
-                        {this.state.currentWeek === 0 && (
-                          <View style={[styles.equal_item]} />
-                        )}
-                        <Text style={styles.option_text}>未开学</Text>
-                        {this.state.currentWeek === 0 && (
-                          <Text
-                            style={[
-                              styles.equal_item,
-                              styles.font,
-                              styles.current
-                            ]}
-                          >
-                            当前
-                          </Text>
-                        )}
-                      </Touchable>
-                    </View>
-                  )}
-                  {this.WeekOptions.map((item, index) => {
-                    return (
+          {this.state.isShow ? (
+            <View style={styles.dropdown_container}>
+              <View>
+                <Image
+                  style={styles.up_triangle}
+                  source={require("./assets/triangle_up.png")}
+                  resizeMode="cover"
+                />
+                <View style={[styles.list_container]}>
+                  <ScrollView
+                    ref={scrollView => {
+                      this.scrollView = scrollView;
+                    }}
+                    style={styles.dropdown_list}
+                  >
+                    {startTerm > Date.now() && (
                       <View style={styles.option_container}>
-                        <View
+                        <Touchable
+                          onPress={() => {
+                            this.termBegan();
+                          }}
                           style={[
-                            styles.center,
                             styles.option_item,
+                            styles.center,
                             {
-                              backgroundColor:
-                                this.state.choosedWeek == index + 1
-                                  ? "#D7D8D9"
-                                  : "#ffffff"
+                              backgroundColor: this.state.termBegin
+                                ? "#ffffff"
+                                : "#D7D8D9"
                             }
                           ]}
-                          onClick={() => {
-                            this.choosingWeek(index);
-                          }}
                         >
-                          {this.state.currentWeek == index + 1 && (
+                          {this.state.currentWeek === 0 && (
                             <View style={[styles.equal_item]} />
                           )}
-                          <Text
-                            style={[styles.option_text, styles.option_size]}
-                          >
-                            第{this.WeekOptions[index]}周
-                          </Text>
-                          {this.state.currentWeek == index + 1 && (
+                          <Text style={styles.option_text}>未开学</Text>
+                          {this.state.currentWeek === 0 && (
                             <Text
                               style={[
                                 styles.equal_item,
@@ -185,24 +148,65 @@ class Header extends Component {
                               当前
                             </Text>
                           )}
-                        </View>
+                        </Touchable>
                       </View>
-                    );
-                  })}
-                </ScrollView>
-                <View style={[styles.center]}>
-                  <Button
-                    onPress={() => this.confirmChange()}
-                    style={[styles.set_button, styles.center]}
-                  >
-                    <Text style={[styles.button_text, styles.option_size]}>
-                      设为当前周
-                    </Text>
-                  </Button>
+                    )}
+                    {this.WeekOptions.map((item, index) => {
+                      return (
+                        <View style={styles.option_container}>
+                          <View
+                            style={[
+                              styles.center,
+                              styles.option_item,
+                              {
+                                backgroundColor:
+                                  this.state.choosedWeek == index + 1
+                                    ? "#D7D8D9"
+                                    : "#ffffff"
+                              }
+                            ]}
+                            onClick={() => {
+                              this.choosingWeek(index);
+                            }}
+                          >
+                            {this.state.currentWeek == index + 1 && (
+                              <View style={[styles.equal_item]} />
+                            )}
+                            <Text
+                              style={[styles.option_text, styles.option_size]}
+                            >
+                              第{this.WeekOptions[index]}周
+                            </Text>
+                            {this.state.currentWeek == index + 1 && (
+                              <Text
+                                style={[
+                                  styles.equal_item,
+                                  styles.font,
+                                  styles.current
+                                ]}
+                              >
+                                当前
+                              </Text>
+                            )}
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </ScrollView>
+                  <View style={[styles.center]}>
+                    <Button
+                      onPress={() => this.confirmChange()}
+                      style={[styles.set_button, styles.center]}
+                    >
+                      <Text style={[styles.button_text, styles.option_size]}>
+                        设为当前周
+                      </Text>
+                    </Button>
+                  </View>
                 </View>
               </View>
-            </Dropdown>
-          </View>
+            </View>
+          ) : null}
           <View style={styles.add}>
             <Link
               href="http://10.193.44.188:9999/js/second.bundle.js?_wx_tpl=http://10.193.44.188:9999/js/second.bundle.js"
@@ -233,16 +237,6 @@ for (let i = 0; i < 7; i++) {
     temp.setDate(temp.getDate() + 1);
   }
   weekDate[i] = temp.getMonth() + 1 + "-" + temp.getDate();
-}
-
-var emptyGrids = [];
-for (let i = 0; i < 7; i++) {
-  emptyGrids[i] = new Array(14);
-}
-for (let i = 0; i < 7; i++) {
-  for (let j = 0; j < 14; j++) {
-    emptyGrids[i][j] = j;
-  }
 }
 
 const getEmptyCourseArray = () => {
@@ -280,7 +274,8 @@ class Table extends Component {
       (this.lesson = new Map()),
       (this.state = {
         courseList: [],
-        courseArray: getEmptyCourseArray()
+        courseArray: getEmptyCourseArray(),
+        lessonShow: false
       });
     //  保存上一次滑动的坐标
     this._previousLeft = TABLE_INITIAL_LEFT;
@@ -292,6 +287,10 @@ class Table extends Component {
         top: TABLE_INITIAL_TOP
       }
     };
+  }
+
+  componentWillMount() {
+    this.getCourse();
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -478,13 +477,15 @@ class Table extends Component {
   };
   showLesson = list => {
     this.setState({
-      courseList: list
+      courseList: list,
+      lessonShow: true
     });
-    this.refs.lesson.show();
   };
 
   hideLesson = () => {
-    this.refs.lesson.hide();
+    this.setState({
+      lessonShow: false
+    });
   };
 
   inArray = (s, week) => {
@@ -615,46 +616,6 @@ class Table extends Component {
                           {list.length > 1 && <View style={[styles.more]} />}
                         </Touchable>
                         <Modal
-                          ref="lesson"
-                          contentStyle={[
-                            styles.lesson_modal,
-                            {
-                              height: 200 * this.state.courseList.length - 50
-                            }
-                          ]}
-                        >
-                          {this.state.courseList.map(course => {
-                            return (
-                              <Touchable onPress={this.hideLesson}>
-                                <View
-                                  style={[
-                                    styles.item_center,
-                                    styles.modal_cards
-                                  ]}
-                                >
-                                  <Text
-                                    style={[
-                                      styles.modal_font,
-                                      styles.modal_course,
-                                      {
-                                        color: this.colors[course.color]
-                                      }
-                                    ]}
-                                  >
-                                    {course.course}
-                                  </Text>
-                                  <Text style={[styles.modal_font]}>
-                                    {course.teacher}
-                                  </Text>
-                                  <Text style={[styles.modal_font]}>
-                                    @{course.place}
-                                  </Text>
-                                </View>
-                              </Touchable>
-                            );
-                          })}
-                        </Modal>
-                        <Modal
                           ref="deleteModal"
                           contentStyle={[
                             styles.delete_modal,
@@ -750,6 +711,40 @@ class Table extends Component {
             {this.weekData.map(this.weekList)}
           </ScrollView>
         </View>
+        {this.state.lessonShow ? (
+          <Touchable style={styles.modal_bg} onPress={this.hideLesson}>
+            <View
+              style={[
+                styles.lesson_modal,
+                {
+                  height: 200 * this.state.courseList.length - 50
+                }
+              ]}
+            >
+              {this.state.courseList.map(course => {
+                return (
+                  <Touchable onPress={this.hideLesson}>
+                    <View style={[styles.item_center, styles.modal_cards]}>
+                      <Text
+                        style={[
+                          styles.modal_font,
+                          styles.modal_course,
+                          {
+                            color: this.colors[course.color]
+                          }
+                        ]}
+                      >
+                        {course.course}
+                      </Text>
+                      <Text style={[styles.modal_font]}>{course.teacher}</Text>
+                      <Text style={[styles.modal_font]}>@{course.place}</Text>
+                    </View>
+                  </Touchable>
+                );
+              })}
+            </View>
+          </Touchable>
+        ) : null}
       </View>
     );
   }
@@ -770,19 +765,26 @@ class App extends Component {
 
   render() {
     return (
-      <View style={styles.app}>
+      <Touchable
+        style={styles.app}
+        onPress={() => {
+          this.refs.header.hideWeekModal();
+        }}
+      >
         <Table ref="table" currentWeek={this.state.currentWeek} />
-        <Header changeWeek={week => this.changeWeektoTable(week)} />
+        <Header
+          ref="header"
+          changeWeek={week => this.changeWeektoTable(week)}
+        />
         <Touchable
           onPress={() => {
-            this.refs.table.reset();
-            this.refs.table.getCourseFromServer();
+            this.refs.table.getCourse();
           }}
           style={styles.header_refresh}
         >
           <Text style={[styles.fresh_text]}>刷新课表</Text>
         </Touchable>
-      </View>
+      </Touchable>
     );
   }
 }
