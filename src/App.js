@@ -12,7 +12,7 @@ import PanResponder from "universal-panresponder";
 import TableService from "./services/table";
 import Modal from "rax-modal";
 import Link from "rax-link";
-// const native = require("@weex-module/test");
+const native = require("@weex-module/test");
 import Dropdown from "../box-ui/common/dropdown-list/index";
 
 var initWeek = 0;
@@ -258,6 +258,9 @@ const getEmptyCourseArray = () => {
   return emptyCourseArray;
 };
 
+const TABLE_INITIAL_LEFT = 80;
+const TABLE_INITIAL_TOP = 170;
+
 class Table extends Component {
   constructor(props) {
     super(props);
@@ -276,15 +279,17 @@ class Table extends Component {
       }),
       (this.lesson = new Map()),
       (this.state = {
-        left: 100,
-        top: 170,
         courseList: [],
         courseArray: getEmptyCourseArray()
       });
+    //  保存上一次滑动的坐标
+    this._previousLeft = TABLE_INITIAL_LEFT;
+    this._previousTop = TABLE_INITIAL_TOP;
+    // 画布的坐标状态
     this._tableStyles = {
       style: {
-        left: this._previousLeft,
-        top: this._previousTop
+        left: TABLE_INITIAL_LEFT,
+        top: TABLE_INITIAL_TOP
       }
     };
     this._panResponder = PanResponder.create({
@@ -295,8 +300,7 @@ class Table extends Component {
       onPanResponderRelease: this._handlePanResponderEnd,
       onPanResponderTerminate: this._handlePanResponderEnd
     });
-    this._previousLeft = 80;
-    this._previousTop = 170;
+    // 左侧时间的滚动位置
     this._orderStyles = {
       style: {
         top: this._previousTop
@@ -316,6 +320,7 @@ class Table extends Component {
   }
 
   componentDidMount() {
+    // 初始化时设置画布的样式
     this._updateLeft();
     this._updateTop();
   }
@@ -361,37 +366,17 @@ class Table extends Component {
     this.getCourseFromServer();
   };
   _updateLeft() {
-    let LeftTemp = this._tableStyles.style.left;
-    if (LeftTemp > 80) {
-      LeftTemp = 80;
-    }
-    if (LeftTemp < -50) {
-      LeftTemp = -50;
-    }
-
-    // this.setState({
-    //   left: LeftTemp
-    // });
-    this._tableStyles.style.left = LeftTemp;
     setNativeProps(this.table, {
       style: {
-        left: LeftTemp,
+        left: this._tableStyles.style.left,
         top: this._tableStyles.style.top
       }
     });
-    this.scrollView.scrollTo({ x: 80 - LeftTemp });
+    this.scrollView.scrollTo({ x: 80 - this._tableStyles.style.left });
   }
 
   _updateTop() {
-    let TopTemp = this._tableStyles.style.top;
-    if (TopTemp > 170) {
-      TopTemp = 170;
-    }
-    if (TopTemp < -200) {
-      TopTemp = -200;
-    }
-    this._tableStyles.style.top = TopTemp;
-    this._orderStyles.style.top = TopTemp;
+    this._orderStyles.style.top = this._tableStyles.style.top;
     setNativeProps(this.table, {
       style: {
         left: this._tableStyles.style.left,
@@ -414,40 +399,49 @@ class Table extends Component {
   }
 
   _handlePanResponderMove = (e, gestureState) => {
+    // 竖直方向滚动
     if (Math.abs(gestureState.dy) >= Math.abs(gestureState.dx)) {
       if (
+        // 越界检查，已经到边界不能再拖
         !(this._tableStyles.style.top == -200 && gestureState.dy < 0) &&
         !(this._tableStyles.style.top == 170 && gestureState.dy > 0)
       ) {
         this._tableStyles.style.top = this._previousTop + gestureState.dy;
+        // 越界检查，超出边界时 reset
+        if (this._tableStyles.style.top <= -200) {
+          this._tableStyles.style.top = -200;
+        }
+        if (this._tableStyles.style.top >= 170) {
+          this._tableStyles.style.top = 170;
+        }
         this._updateTop();
       }
     } else {
+      // 水平方向滚动
       if (
+        // 越界检查，已经到边界不能再拖
         !(this._tableStyles.style.left == -50 && gestureState.dx < 0) &&
         !(this._tableStyles.style.left == 80 && gestureState.dx > 0)
       ) {
         this._tableStyles.style.left = this._previousLeft + gestureState.dx;
+        // 越界检查，超出边界时 reset
+        if (this._tableStyles.style.left <= -50) {
+          this._tableStyles.style.left = -50;
+        }
+        if (this._tableStyles.style.left >= 80) {
+          this._tableStyles.style.left = 80;
+        }
         this._updateLeft();
       }
     }
   };
 
+  // 更新 previous value 为上一次滑动结束时的坐标
   _handlePanResponderEnd = (e, gestureState) => {
     if (Math.abs(gestureState.dy) >= Math.abs(gestureState.dx)) {
-      if (
-        !(this._tableStyles.style.top == -200 && gestureState.dy < 0) &&
-        !(this._tableStyles.style.top == 170 && gestureState.dy > 0)
-      ) {
-        this._previousTop += gestureState.dy;
-      }
+      this._previousTop = this._tableStyles.style.top;
     } else {
-      if (
-        !(this._tableStyles.style.left == -50 && gestureState.dx < 0) &&
-        !(this._tableStyles.style.left == 80 && gestureState.dx > 0)
-      ) {
-        this._previousLeft += gestureState.dx;
-      }
+      this._previousLeft = this._tableStyles.style.left;
     }
   };
 
@@ -532,7 +526,7 @@ class Table extends Component {
     return (
       <View>
         <View
-          style={[styles.lesson_table, this._tableStyles.style]}
+          style={[styles.lesson_table]}
           ref={table => {
             this.table = table;
           }}
@@ -561,9 +555,9 @@ class Table extends Component {
                           styles.daily_lesson,
                           {
                             width: this.weekDay[item.day] == day ? 200 : 100,
-                            height: parseInt(item.during) * 100,
+                            height: parseInt(item.during) * 100 - 5,
                             position: "absolute",
-                            top: (parseInt(item.start) - 1) * 100
+                            top: (parseInt(item.start) - 1) * 100 + 3
                           }
                         ]}
                       >

@@ -1,9 +1,14 @@
 .app {
   background-color: #efeff4;
-  width: 750;
-  height: 1200;
+  display: flex;
+  flex: 1;
 }
 
+.text {
+  color: red;
+  font-size:24;
+
+}
 .center {
   display: flex;
   justify-content: center;
@@ -175,9 +180,9 @@
 }
 
 .daily_lesson {
-  border-bottom: 2px solid #F0F0F1;
+  border-bottom: 0.5 solid #efeff4;
   background-color: #ffffff;
-  border-right: 2px solid #F0F0F1;
+  border-right: 0.5 solid #efeff4;
 }
 
 .lesson_item {
