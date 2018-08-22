@@ -278,3 +278,11 @@
 .delete_text {
   font-size: 35;
 }
+.modal_bg {
+  position: absolute;
+  width: 750;
+  height: 1200;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+}
