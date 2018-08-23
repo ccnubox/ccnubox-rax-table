@@ -72,8 +72,7 @@ class Table extends Component {
       (this.lesson = new Map()),
       (this.state = {
         courseList: [],
-        courseArray: getEmptyCourseArray(),
-        lessonShow: false
+        courseArray: getEmptyCourseArray()
       });
     //  保存上一次滑动的坐标
     this._previousLeft = TABLE_INITIAL_LEFT;
