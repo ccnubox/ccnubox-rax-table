@@ -12,7 +12,7 @@ import PanResponder from "universal-panresponder";
 import TableService from "./services/table";
 import Modal from "rax-modal";
 import Link from "rax-link";
-// const native = require("@weex-module/test");
+const native = require("@weex-module/test");
 import Dropdown from "../box-ui/common/dropdown-list/index";
 
 var initWeek = 0;
@@ -255,6 +255,11 @@ const getEmptyCourseArray = () => {
 const TABLE_INITIAL_LEFT = 80;
 const TABLE_INITIAL_TOP = 170;
 
+// 根据设备高度 算出 top 的边界值。10 是状态栏高度，64 是导航栏高度，45，40，700 是内容区的header，周数，画布的高度。
+// 这种算法没有考虑 iPhone X，X 的状态栏高度比较高，但这里没法去判断设备是否是 X，或许可以从 Native 获取。
+const TABLE_TOP_LIMIT =
+  screen.height / window.devicePixelRatio + 10 - 64 - 45 - 40 - 700;
+
 class Table extends Component {
   constructor(props) {
     super(props);
@@ -287,10 +292,6 @@ class Table extends Component {
         top: TABLE_INITIAL_TOP
       }
     };
-  }
-
-  componentWillMount() {
-    this.getCourse();
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -302,9 +303,13 @@ class Table extends Component {
     // 左侧时间的滚动位置
     this._orderStyles = {
       style: {
-        top: this._previousTop
+        top: TABLE_INITIAL_TOP
       }
     };
+  }
+
+  componentWillMount() {
+    this.getCourse();
   }
 
   reset = () => {
@@ -402,14 +407,17 @@ class Table extends Component {
     if (Math.abs(gestureState.dy) >= Math.abs(gestureState.dx)) {
       if (
         // 越界检查，已经到边界不能再拖
-        !(this._tableStyles.style.top == -200 && gestureState.dy < 0) &&
+        !(
+          this._tableStyles.style.top == TABLE_TOP_LIMIT && gestureState.dy < 0
+        ) &&
         !(this._tableStyles.style.top == 170 && gestureState.dy > 0)
       ) {
         this._tableStyles.style.top = this._previousTop + gestureState.dy;
         // 越界检查，超出边界时 reset
-        if (this._tableStyles.style.top <= -200) {
-          this._tableStyles.style.top = -200;
+        if (this._tableStyles.style.top <= TABLE_TOP_LIMIT) {
+          this._tableStyles.style.top = TABLE_TOP_LIMIT;
         }
+
         if (this._tableStyles.style.top >= 170) {
           this._tableStyles.style.top = 170;
         }
