@@ -101,7 +101,7 @@
   flex-direction: row;
 }
 .option_item {
-  border-bottom: 2 solid #efeff4;
+  border-bottom: 1 solid #efeff4;
 }
 
 .button_text,
@@ -180,9 +180,9 @@
 }
 
 .daily_lesson {
-  border-bottom: 0.5 solid #efeff4;
+  border-bottom: 2 solid #efeff4;
   background-color: #ffffff;
-  border-right: 0.5 solid #efeff4;
+  border-right: 2 solid #efeff4;
 }
 
 .lesson_item {
