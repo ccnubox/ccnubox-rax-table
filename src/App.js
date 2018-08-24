@@ -74,8 +74,7 @@ class Table extends Component {
       (this.lesson = new Map()),
       (this.state = {
         courseList: [],
-        courseArray: getEmptyCourseArray(),
-        lessonShow: false
+        courseArray: getEmptyCourseArray()
       });
     //  保存上一次滑动的坐标
     this._previousLeft = TABLE_INITIAL_LEFT;
@@ -305,19 +304,16 @@ class Table extends Component {
       </View>
     );
   };
-  showLesson = list => {
+  showLesson = (list) => {
     this.setState({
-      courseList: list,
-      lessonShow: true
-    });
+      courseList: list
+    })
+    this.refs.lesson.show();
   };
 
   hideLesson = () => {
-    this.setState({
-      lessonShow: false
-    });
+    this.refs.lesson.hide();
   };
-
   inArray = (s, week) => {
     let arr = [];
     arr = s.split(",");
@@ -428,11 +424,11 @@ class Table extends Component {
                                   {item.course}
                                 </Text>
                               ) : (
-                                <Text style={[styles.course_text, styles.font]}>
-                                  {item.course}
-                                  (非本周)
+                                  <Text style={[styles.course_text, styles.font]}>
+                                    {item.course}
+                                    (非本周)
                                 </Text>
-                              )}
+                                )}
                             </View>
                             <View
                               style={[styles.item_center, styles.course_info]}
@@ -541,40 +537,23 @@ class Table extends Component {
             {this.weekData.map(this.weekList)}
           </ScrollView>
         </View>
-        {this.state.lessonShow ? (
-          <Touchable style={styles.modal_bg} onPress={this.hideLesson}>
-            <View
-              style={[
-                styles.lesson_modal,
-                {
-                  height: 200 * this.state.courseList.length - 50
-                }
-              ]}
-            >
-              {this.state.courseList.map(course => {
-                return (
-                  <Touchable onPress={this.hideLesson}>
-                    <View style={[styles.item_center, styles.modal_cards]}>
-                      <Text
-                        style={[
-                          styles.modal_font,
-                          styles.modal_course,
-                          {
-                            color: this.colors[course.color]
-                          }
-                        ]}
-                      >
-                        {course.course}
-                      </Text>
-                      <Text style={[styles.modal_font]}>{course.teacher}</Text>
-                      <Text style={[styles.modal_font]}>@{course.place}</Text>
-                    </View>
-                  </Touchable>
-                );
-              })}
-            </View>
-          </Touchable>
-        ) : null}
+        <Modal ref="lesson" contentStyle={[styles.lesson_modal, {
+          height: 200 * this.state.courseList.length - 50
+        }]}>
+          {this.state.courseList.map(course => {
+            return (
+              <Touchable onPress={this.hideLesson}>
+                <View style={[styles.item_center, styles.modal_cards]}>
+                  <Text style={[styles.modal_font, styles.modal_course, {
+                    color: this.colors[course.color]
+                  }]}>{course.course}</Text>
+                  <Text style={[styles.modal_font]}>{course.teacher}</Text>
+                  <Text style={[styles.modal_font]}>@{course.place}</Text>
+                </View>
+              </Touchable>
+            )
+          })}
+        </Modal>
       </View>
     );
   }
