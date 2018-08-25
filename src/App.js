@@ -10,9 +10,8 @@ import ScrollView from "rax-scrollview";
 import PanResponder from "universal-panresponder";
 import TableService from "./services/table";
 import Modal from "rax-modal";
-import Link from "rax-link";
 import Header from "./header";
-// const native = require("@weex-module/test");
+const native = require("@weex-module/test");
 
 var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
 if (day == -1) {
@@ -56,6 +55,9 @@ const TABLE_TOP_LIMIT =
 class Table extends Component {
   constructor(props) {
     super(props);
+    this.sid = "";
+    this.pwd = "";
+    this.stuInfo = ""; // Base64(sid:pwd)
     (this.weekData = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]),
       (this.order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]),
       (this.colors = ["#f6b37f", "#f29c9f", "#13b5b1", "#8372D3"]),
@@ -101,7 +103,7 @@ class Table extends Component {
   }
 
   componentWillMount() {
-    this.getCourse();
+    this.initCourseData();
   }
 
   reset = () => {
@@ -133,29 +135,60 @@ class Table extends Component {
     return _CourseArray;
   };
 
-  getCourseFromServer = () => {
+  getCourseFromServerImpl = options => {
     let _CourseArray = this.state.courseArray;
-    TableService.getTableList().then(res => {
-      // native.saveCachedTable(JSON.stringify(res))
+    TableService.getTableList(options).then(res => {
       this.setState({
         courseArray: this.setCourseArray(res, _CourseArray)
       });
     });
   };
 
-  getCourse = () => {
-    // native.getCachedTable((res) => {
-    //   if (res.code === "404") {
-    //     this.getCourseFromServer();
-    //   } else {
-    //     let _CourseArray = this.state.courseArray;
-    //     this.setState({
-    //       courseArray: this.setCourseArray(JSON.parse(res.result), _CourseArray)
-    //     })
-    //   }
-    // })
+  getCourseFromServer = () => {
+    if (!this.sid || !this.pwd) alert("未登录");
+    native.getCookie(res => {
+      if (res.code === "200") {
+        this.getCourseFromServerImpl({
+          sid: this.sid,
+          token: this.stuInfo,
+          cookie: {
+            Jsessionid: res.cookieJ,
+            Bigipserverpool: res.cookieB
+          }
+        });
+      } else {
+        // 兜底：如果模拟登陆失败，不带 cookie 请求服务端
+        this.getCourseFromServerImpl({
+          sid: this.sid,
+          token: this.stuInfo
+        });
+      }
+    });
+  }
 
-    this.getCourseFromServer();
+  initCourseData = () => {
+    // 初始化时拉取 Sid
+    native.getStuInfo(res => {
+      if (res.code === "200") {
+        this.sid = res.sid;
+        this.pwd = res.pwd;
+        this.stuInfo = btoa(this.sid + ":" + "pwd");
+        // native.getCachedTable((res) => {
+        //   if (res.code === "404") {
+        //     this.getCourseFromServer();
+        //   } else {
+        //     let _CourseArray = this.state.courseArray;
+        //     this.setState({
+        //       courseArray: this.setCourseArray(JSON.parse(res.result), _CourseArray)
+        //     })
+        //   }
+        // })
+        this.getCourseFromServer();
+      } else {
+        // 理论上不会走到这个分支，因为课程表有登录 guard
+        alert("未登录");
+      }
+    });
   };
   _updateLeft() {
     setNativeProps(this.table, {
@@ -554,7 +587,7 @@ class App extends Component {
         />
         <Touchable
           onPress={() => {
-            this.refs.table.getCourse();
+            this.refs.table.getCourseFromServer()
           }}
           style={styles.header_refresh}
         >
