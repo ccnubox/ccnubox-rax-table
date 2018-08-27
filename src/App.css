@@ -64,9 +64,7 @@
   border-radius: 20;
   width: 250;
   background-color: #ffffff;
-  border-left: 2 solid #efeff4;
   border-bottom: 2 solid #efeff4;
-  border-right: 2 solid #efeff4;
 }
 
 .option_text, .week_text, .daily_lesson {
