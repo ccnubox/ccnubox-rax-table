@@ -17,7 +17,8 @@
 }
 
 .header {
-  height: 90;
+  /* height: 110;
+  padding-top: 20; */
   background-color: #f8f8f8;
   position: absolute;
   top: 0;
@@ -46,7 +47,6 @@
 
 .dropdown_container {
   position: absolute;
-  top: 70;
   width: 250;
   left: 250;
   display: flex;
@@ -139,7 +139,6 @@
   display: flex;
   flex-direction: row;
   position: absolute;
-  top: 90;
 }
 .week_data {
   width: 650;
@@ -226,7 +225,6 @@
 }
 .header_refresh {
   position: absolute;
-  top: 20;
   left: 50;
 }
 .fresh_text {
@@ -235,7 +233,6 @@
 }
 .add {
   position: absolute;
-  top: 20;
   right: 50;
 }
 .modal_cards {

@@ -3,25 +3,31 @@ import View from "rax-view";
 import Text from "rax-text";
 import styles from "./App.css";
 import Touchable from "rax-touchable";
-import ListView from "rax-listview";
 import Button from "rax-button";
 import Image from "rax-image";
 import ScrollView from "rax-scrollview";
-import PanResponder from "universal-panresponder";
-import TableService from "./services/table";
-import Modal from "rax-modal";
-import Link from "rax-link";
+import moment from "moment";
+const native = require("@weex-module/test");
+import { parseSearchString } from "../box-ui/util";
 
-var initWeek = 0;
-var startTerm = new Date(2018, 8, 1);
+let qd = {};
+// 获取查询参数
+if (window.location.search) {
+  qd = parseSearchString(window.location.search);
+} else {
+  alert("参数缺失错误 " + window.location);
+}
+
+const START_COUNT_DAY = new Date(qd.startCountDay[0]);
+const START_COUNT_DAY_PRESET = new Date(qd.startCountDayPreset[0]);
 
 class Header extends Component {
   constructor(props) {
     super(props);
     this.WeekOptions = [];
     this.state = {
-      currentWeek: initWeek, // 当前周
-      choosedWeek: initWeek, // 设为当前周
+      currentWeek: this.props.currentWeek, // 当前周
+      choosedWeek: this.props.currentWeek, // 临时变量，用户改变当前周但没有保存时的当前周数
       showsVerticalScrollIndicator: false,
       isShow: false,
       confirm: false,
@@ -29,10 +35,10 @@ class Header extends Component {
     };
   }
   componentWillMount() {
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= 35; i++) {
       this.WeekOptions.push(i);
     }
-    if (startTerm < Date.now()) {
+    if (START_COUNT_DAY < Date.now()) {
       this.setState({
         termBegin: true
       });
@@ -52,13 +58,44 @@ class Header extends Component {
   };
 
   confirmChange = () => {
+    // 设置未开学为当前周，重置 startCountDay
+    if (this.state.choosedWeek === 0) {
+      this.setState({
+        currentWeek: this.state.choosedWeek,
+        confirm: true,
+        termBegin: true,
+        isShow: false
+      });
+      native.clearStartCountDay();
+      return;
+    }
+
+    // 推算出当前周对应的 startCountDay
+    // 1.找到当前周一
+    let currDate = moment();
+    let currDay = currDate.day();
+    let currMonday;
+    if (currDay === 0) {
+      currMonday = currDate.subtract(6, "days");
+    } else {
+      currMonday = currDate.subtract(currDay - 1, "days");
+    }
+
+    // 2.找到x周前的周一
+    let startCountDay = currMonday.subtract(
+      (this.state.choosedWeek - 1) * 7,
+      "days"
+    );
+
+    native.saveStartCountDay(startCountDay.format("YYYY-MM-DD"));
+
     this.setState({
       currentWeek: this.state.choosedWeek,
       confirm: true,
       termBegin: true,
       isShow: false
     });
-    this.props.changeWeek(this.state.currentWeek);
+    this.props.changeWeek(this.state.choosedWeek);
   };
 
   choosingWeek = index => {
@@ -67,26 +104,30 @@ class Header extends Component {
       confirm: false,
       termBegin: true
     });
-    this.props.changeWeek(this.state.choosedWeek);
+    this.props.changeWeek(index + 1);
   };
 
-  termBegan = () => {
+  // 点击未开学，设置 chooseWeek 为 0
+  resetChooseWeek = () => {
     this.setState({
+      confirm: false,
       termBegin: false,
-      currentWeek: 0,
       choosedWeek: 0
     });
+    this.props.changeWeek(0);
   };
 
   render() {
     return (
       <View>
-        <View style={[styles.header, styles.center]}>
+        <View
+          style={[styles.header, styles.center, this.props.headerStyles.style]}
+        >
           <Touchable
             onPress={this.showWeekModal}
             style={[styles.choose_label, styles.center]}
           >
-            {startTerm > Date.now() && this.state.choosedWeek === 0 ? (
+            {this.state.choosedWeek === 0 ? (
               <Text style={styles.choose_text}>未开学</Text>
             ) : (
               <Text style={styles.choose_text}>
@@ -100,7 +141,7 @@ class Header extends Component {
             />
           </Touchable>
           {this.state.isShow ? (
-            <View style={styles.dropdown_container}>
+            <View style={[styles.dropdown_container, this.props.dropdownStyle]}>
               <View>
                 <Image
                   style={styles.up_triangle}
@@ -114,11 +155,11 @@ class Header extends Component {
                     }}
                     style={styles.dropdown_list}
                   >
-                    {startTerm > Date.now() && (
+                    {START_COUNT_DAY_PRESET > new Date() && (
                       <View style={styles.option_container}>
                         <Touchable
                           onPress={() => {
-                            this.termBegan();
+                            this.resetChooseWeek();
                           }}
                           style={[
                             styles.option_item,
@@ -204,13 +245,22 @@ class Header extends Component {
               </View>
             </View>
           ) : null}
-          <View style={styles.add}>
-            <Link
-              href="http://10.193.44.188:9999/js/second.bundle.js?_wx_tpl=http://10.193.44.188:9999/js/second.bundle.js"
-              style={[styles.fresh_text]}
+          <View style={[styles.add, this.props.btnStyle]}>
+            <Touchable
+              onPress={() => {
+                native.getStuInfo(res => {
+                  if (res.code === "200") {
+                    let sid = res.sid;
+                    native.push(`ccnubox://table.add?sid=${sid}`);
+                  } else {
+                    // 理论上不会走到这个分支，因为课程表有登录 guard
+                    alert("请登录");
+                  }
+                });
+              }}
             >
-              添课
-            </Link>
+              <Text style={[styles.fresh_text]}>添课</Text>
+            </Touchable>
           </View>
         </View>
       </View>

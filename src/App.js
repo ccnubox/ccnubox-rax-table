@@ -3,15 +3,13 @@ import View from "rax-view";
 import Text from "rax-text";
 import styles from "./App.css";
 import Touchable from "rax-touchable";
-import ListView from "rax-listview";
-import Button from "rax-button";
-import Image from "rax-image";
 import ScrollView from "rax-scrollview";
 import PanResponder from "universal-panresponder";
 import TableService from "./services/table";
 import Modal from "rax-modal";
-import Header from "./header";
 const native = require("@weex-module/test");
+import Header from "./header";
+import { parseSearchString } from "../box-ui/util";
 
 var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
 if (day == -1) {
@@ -44,14 +42,47 @@ const getEmptyCourseArray = () => {
   return emptyCourseArray;
 };
 
-const TABLE_INITIAL_LEFT = 80;
-const TABLE_INITIAL_TOP = 170;
+let qd = {};
+// 获取查询参数
+if (window.location.search) {
+  qd = parseSearchString(window.location.search);
+} else {
+  alert("参数缺失错误 " + window.location);
+}
+const STATUS_BAR_HEIGHT = Number(qd.statusBarHeight[0]);
+const NAV_BAR_HEIGHT = Number(qd.navBarHeight[0]);
+const START_COUNT_DAY = qd.startCountDay[0];
 
-// 根据设备高度 算出 top 的边界值。10 是状态栏高度，64 是导航栏高度，45，40，700 是内容区的header，周数，画布的高度。
+const TABLE_INITIAL_LEFT = 80;
+const TABLE_INITIAL_TOP = (45 + STATUS_BAR_HEIGHT) * 2 + 40 * 2;
+
+const headerStyles = {
+  style: {
+    height: (45 + STATUS_BAR_HEIGHT) * 2,
+    paddingTop: STATUS_BAR_HEIGHT * 2
+  }
+};
+const weekListStyles = {
+  style: {
+    top: (45 + STATUS_BAR_HEIGHT) * 2
+  }
+};
+
+// 根据设备高度 算出 top 的边界值。10 是状态栏高度，88 是导航栏高度，45，40，700 是内容区的header，周数，画布的高度。
 // 这种算法没有考虑 iPhone X，X 的状态栏高度比较高，但这里没法去判断设备是否是 X，或许可以从 Native 获取。
 const TABLE_TOP_LIMIT =
-  screen.height / window.devicePixelRatio + 10 - 64 - 45 - 40 - 700;
+  (TABLE_INITIAL_TOP / 2 -
+    Math.abs(
+      700 -
+        (((screen.height / window.devicePixelRatio) * 375) /
+          (screen.width / window.devicePixelRatio) -
+          Number(NAV_BAR_HEIGHT) -
+          headerStyles.style.height / 2 -
+          40)
+    )) *
+  2;
 
+// alert(screen.height / window.devicePixelRatio)
 class Table extends Component {
   constructor(props) {
     super(props);
@@ -145,7 +176,7 @@ class Table extends Component {
   };
 
   getCourseFromServer = () => {
-    if (!this.sid || !this.pwd) alert("未登录");
+    if (!this.checkLogin()) return;
     native.getCookie(res => {
       if (res.code === "200") {
         this.getCourseFromServerImpl({
@@ -164,7 +195,7 @@ class Table extends Component {
         });
       }
     });
-  }
+  };
 
   initCourseData = () => {
     // 初始化时拉取 Sid
@@ -231,16 +262,25 @@ class Table extends Component {
         !(
           this._tableStyles.style.top == TABLE_TOP_LIMIT && gestureState.dy < 0
         ) &&
-        !(this._tableStyles.style.top == 170 && gestureState.dy > 0)
+        !(
+          this._tableStyles.style.top == TABLE_INITIAL_TOP &&
+          gestureState.dy > 0
+        )
       ) {
         this._tableStyles.style.top = this._previousTop + gestureState.dy;
+        native.log(
+          String(this._tableStyles.style.top + " " + String(TABLE_TOP_LIMIT))
+        );
+        native.log(
+          String(screen.height) + " " + String(window.devicePixelRatio)
+        );
         // 越界检查，超出边界时 reset
         if (this._tableStyles.style.top <= TABLE_TOP_LIMIT) {
           this._tableStyles.style.top = TABLE_TOP_LIMIT;
         }
 
-        if (this._tableStyles.style.top >= 170) {
-          this._tableStyles.style.top = 170;
+        if (this._tableStyles.style.top >= TABLE_INITIAL_TOP) {
+          this._tableStyles.style.top = TABLE_INITIAL_TOP;
         }
         this._updateTop();
       }
@@ -304,10 +344,10 @@ class Table extends Component {
       </View>
     );
   };
-  showLesson = (list) => {
+  showLesson = list => {
     this.setState({
       courseList: list
-    })
+    });
     this.refs.lesson.show();
   };
 
@@ -342,11 +382,30 @@ class Table extends Component {
     this.refs.deleteModal.show();
   };
 
+  checkLogin = () => {
+    if (this.sid === "" || this.pwd === "") {
+      alert("未登录");
+      return false;
+    }
+    return true;
+  };
+
   deleteCourse = id => {
-    TableService.deleteLesson(id).then(res => {
-      this.refs.deleteModal.hide();
-      this.getCourse();
-    });
+    if (!this.checkLogin()) return;
+    let options = {
+      id,
+      sid: this.sid,
+      pwd: this.pwd,
+      stuInfo: btoa(this.sid + ":" + this.pwd)
+    };
+    TableService.deleteLesson(options)
+      .then(res => {
+        this.refs.deleteModal.hide();
+        this.getCourse();
+      })
+      .catch(() => {
+        alert("删除失败");
+      });
   };
 
   render() {
@@ -424,11 +483,11 @@ class Table extends Component {
                                   {item.course}
                                 </Text>
                               ) : (
-                                  <Text style={[styles.course_text, styles.font]}>
-                                    {item.course}
-                                    (非本周)
+                                <Text style={[styles.course_text, styles.font]}>
+                                  {item.course}
+                                  (非本周)
                                 </Text>
-                                )}
+                              )}
                             </View>
                             <View
                               style={[styles.item_center, styles.course_info]}
@@ -524,7 +583,7 @@ class Table extends Component {
             );
           })}
         </View>
-        <View style={[styles.week_row, styles.first_row]}>
+        <View style={[styles.week_row, styles.first_row, weekListStyles.style]}>
           <View style={[styles.order_width, styles.first_row]} />
           <ScrollView
             ref={scrollView => {
@@ -537,21 +596,35 @@ class Table extends Component {
             {this.weekData.map(this.weekList)}
           </ScrollView>
         </View>
-        <Modal ref="lesson" contentStyle={[styles.lesson_modal, {
-          height: 200 * this.state.courseList.length - 50
-        }]}>
+        <Modal
+          ref="lesson"
+          contentStyle={[
+            styles.lesson_modal,
+            {
+              height: 200 * this.state.courseList.length - 50
+            }
+          ]}
+        >
           {this.state.courseList.map(course => {
             return (
               <Touchable onPress={this.hideLesson}>
                 <View style={[styles.item_center, styles.modal_cards]}>
-                  <Text style={[styles.modal_font, styles.modal_course, {
-                    color: this.colors[course.color]
-                  }]}>{course.course}</Text>
+                  <Text
+                    style={[
+                      styles.modal_font,
+                      styles.modal_course,
+                      {
+                        color: this.colors[course.color]
+                      }
+                    ]}
+                  >
+                    {course.course}
+                  </Text>
                   <Text style={[styles.modal_font]}>{course.teacher}</Text>
                   <Text style={[styles.modal_font]}>@{course.place}</Text>
                 </View>
               </Touchable>
-            )
+            );
           })}
         </Modal>
       </View>
@@ -559,11 +632,29 @@ class Table extends Component {
   }
 }
 
+function diff_weeks(dt1, dt2) {
+  var diff = (dt2.getTime() - dt1.getTime()) / 1000;
+  if (diff < 0) return 0;
+  diff /= 60 * 60 * 24 * 7;
+
+  return Math.abs(Math.ceil(diff));
+}
+
+// 根据当前日期和学期初始日期，得出当前周数
+// FIX: startDate 从 0:00 开始
+// FIX: startDate 月份要加0
+// FIX: 可以考虑使用 moment 库
+const calCurrentWeek = () => {
+  let currentDate = new Date();
+  let startDate = new Date(START_COUNT_DAY);
+  return diff_weeks(startDate, currentDate);
+};
+
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentWeek: 1
+      currentWeek: calCurrentWeek()
     };
   }
   changeWeektoTable = week => {
@@ -583,13 +674,26 @@ class App extends Component {
         <Table ref="table" currentWeek={this.state.currentWeek} />
         <Header
           ref="header"
+          currentWeek={this.state.currentWeek}
+          headerStyles={headerStyles}
           changeWeek={week => this.changeWeektoTable(week)}
+          btnStyle={{
+            top: STATUS_BAR_HEIGHT * 2 + 45 / 2
+          }}
+          dropdownStyle={{
+            top: STATUS_BAR_HEIGHT * 2 + 100 / 2
+          }}
         />
         <Touchable
           onPress={() => {
-            this.refs.table.getCourseFromServer()
+            this.refs.table.getCourseFromServer();
           }}
-          style={styles.header_refresh}
+          style={[
+            styles.header_refresh,
+            {
+              top: STATUS_BAR_HEIGHT * 2 + 45 / 2
+            }
+          ]}
         >
           <Text style={[styles.fresh_text]}>刷新课表</Text>
         </Touchable>

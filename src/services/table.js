@@ -20,46 +20,27 @@ const TableService = {
   addLesson(big, sid, jid, password, data) {
     return request({
       method: "POST",
-      url: "https://ccnubox.muxixyz.com/api/ios/table/",
+      url: "https://ccnubox.muxixyz.com/api/table/",
       headers: {
-        'Bigipserverpool': big,
+        'Bigipserverpool': "xxx",
         'Sid': sid,
-        'Jsessionid': jid,
+        'Jsessionid': "xxx",
         'Authorization': "Basic " + btoa(sid + ":" + password)
       },
       body: data
     });
   },
-  editLesson(big, sid, jid, password, id, data) {
-    return request({
-      method: "PUT",
-      url: "https://ccnubox.muxixyz.com/api/table/" + id + "/",
-      headers: {
-        'Bigipserverpool': big,
-        'Sid': sid,
-        'Jsessionid': jid,
-        'Authorization': "Basic " + btoa(sid + ":" + password)
-      },
-      body: data
-    });
-  },
-  deleteLesson(id) {
+  deleteLesson(options) {
+    let headers = {
+      'Accept': 'application/json',
+      'Sid': options.sid,
+      'Authorization': `Basic ${options.token}`
+    }
+
     return request({
       method: "DELETE",
-      url: "https://ccnubox.muxixyz.com/api/table/" + id + "/",
-      // headers: {
-      //   'Bigipserverpool': big,
-      //   'Sid': sid,
-      //   'Jsessionid': jid,
-      //   'Authorization': "Basic " + btoa(sid + ":" + password)
-      // }
-      headers: {
-        'Accept': 'application/json',
-        'Bigipserverpool': "89172160.20480.0000",
-        'Sid': "2016210773",
-        'Jsessionid': "0353EA4BBA48F76FDD41C36A52F10898",
-        'Authorization': "Basic MjAxNjIxMDc3MzowMzA2MTAxNDkwY3J5"
-      }
+      url: "https://ccnubox.muxixyz.com/api/table/" + options.id + "/",
+      headers,
     });
   }
 };

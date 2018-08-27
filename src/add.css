@@ -2,8 +2,6 @@
   flex: 1;
   align-items: center;
   background-color: #efeff4;
-  width: 750;
-  height: 1200;
 }
 .center {
   align-items: center; 
@@ -26,21 +24,22 @@
   color: #6767fa;
 }
 .box {
-  width: 500;
+  width: 550;
   background-color: #ffffff;
   border-radius: 20;
   padding: 5 0;
 } 
 .info_box {
-  height: 150;
+  height: 200;
   margin-top: 50;
 }
 .input_box {
-  height: 70;
-  width: 500;
+  font-size: 32;
+  height: 100;
+  width: 550;
 }
 .time_box {
-  height: 220;
+  height: 300;
   margin-top: 20;
 }
 .time {
@@ -48,7 +47,7 @@
 }
 .input_word {
   margin-left: 20;
-  font-size: 25;
+  font-size: 32;
 }
 .modal  {
   position: absolute;
@@ -145,7 +144,7 @@
   width: 490;
 }
 .time_word {
-  color: #999999;
+  color: #434343;
 }
 .time_choose {
   justify-content: center;
