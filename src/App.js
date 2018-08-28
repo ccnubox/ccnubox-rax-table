@@ -169,6 +169,7 @@ class Table extends Component {
   getCourseFromServerImpl = options => {
     let _CourseArray = this.state.courseArray;
     TableService.getTableList(options).then(res => {
+      native.saveCachedTable(JSON.stringify(res));
       this.setState({
         courseArray: this.setCourseArray(res, _CourseArray)
       });
@@ -177,6 +178,7 @@ class Table extends Component {
 
   getCourseFromServer = () => {
     if (!this.checkLogin()) return;
+    this.reset();
     native.getCookie(res => {
       if (res.code === "200") {
         this.getCourseFromServerImpl({
@@ -204,17 +206,17 @@ class Table extends Component {
         this.sid = res.sid;
         this.pwd = res.pwd;
         this.stuInfo = btoa(this.sid + ":" + "pwd");
-        // native.getCachedTable((res) => {
-        //   if (res.code === "404") {
-        //     this.getCourseFromServer();
-        //   } else {
-        //     let _CourseArray = this.state.courseArray;
-        //     this.setState({
-        //       courseArray: this.setCourseArray(JSON.parse(res.result), _CourseArray)
-        //     })
-        //   }
-        // })
-        this.getCourseFromServer();
+        native.getCachedTable((res) => {
+          if (res.code === "404") {
+            this.getCourseFromServer();
+          } else {
+            let _CourseArray = this.state.courseArray;
+            this.setState({
+              courseArray: this.setCourseArray(JSON.parse(res.result), _CourseArray)
+            })
+          }
+        })
+        // this.getCourseFromServer();
       } else {
         // 理论上不会走到这个分支，因为课程表有登录 guard
         alert("未登录");
@@ -504,7 +506,10 @@ class Table extends Component {
                           ref="deleteModal"
                           contentStyle={[
                             styles.delete_modal,
-                            styles.item_center
+                            styles.item_center,
+                            {
+                              bottom: NAV_BAR_HEIGHT*2
+                            }
                           ]}
                         >
                           <Touchable
