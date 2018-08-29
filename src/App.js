@@ -74,11 +74,11 @@ const TABLE_TOP_LIMIT =
   (TABLE_INITIAL_TOP / 2 -
     Math.abs(
       700 -
-        (((screen.height / window.devicePixelRatio) * 375) /
-          (screen.width / window.devicePixelRatio) -
-          Number(NAV_BAR_HEIGHT) -
-          headerStyles.style.height / 2 -
-          40)
+      (((screen.height / window.devicePixelRatio) * 375) /
+        (screen.width / window.devicePixelRatio) -
+        Number(NAV_BAR_HEIGHT) -
+        headerStyles.style.height / 2 -
+        40)
     )) *
   2;
 
@@ -105,7 +105,8 @@ class Table extends Component {
       (this.lesson = new Map()),
       (this.state = {
         courseList: [],
-        courseArray: getEmptyCourseArray()
+        courseArray: getEmptyCourseArray(),
+        deleteCourse: {}
       });
     //  保存上一次滑动的坐标
     this._previousLeft = TABLE_INITIAL_LEFT;
@@ -140,7 +141,8 @@ class Table extends Component {
   reset = () => {
     this.setState({
       courseList: [],
-      courseArray: getEmptyCourseArray()
+      courseArray: getEmptyCourseArray(),
+      deleteCourse: {}
     });
   };
 
@@ -380,8 +382,13 @@ class Table extends Component {
     return result;
   };
 
-  showDelete = () => {
-    this.refs.deleteModal.show();
+  showDelete = (length, course) => {
+    if (length === 1) {
+      this.setState({
+        deleteCourse: course
+      })
+      this.refs.deleteModal.show();
+    }
   };
 
   checkLogin = () => {
@@ -392,10 +399,10 @@ class Table extends Component {
     return true;
   };
 
-  deleteCourse = id => {
+  deleteCourse = () => {
     if (!this.checkLogin()) return;
     let options = {
-      id,
+      id: this.state.deleteCourse.id,
       sid: this.sid,
       pwd: this.pwd,
       stuInfo: btoa(this.sid + ":" + this.pwd)
@@ -456,7 +463,7 @@ class Table extends Component {
                           delayPressIn={400}
                           delayPressOut={1000}
                           delayLongPress={800}
-                          onLongPress={() => this.showDelete(item.id)}
+                          onLongPress={() => this.showDelete(list.length, item)}
                           style={[
                             styles.lesson_grid_center,
                             {
@@ -485,11 +492,11 @@ class Table extends Component {
                                   {item.course}
                                 </Text>
                               ) : (
-                                <Text style={[styles.course_text, styles.font]}>
-                                  {item.course}
-                                  (非本周)
+                                  <Text style={[styles.course_text, styles.font]}>
+                                    {item.course}
+                                    (非本周)
                                 </Text>
-                              )}
+                                )}
                             </View>
                             <View
                               style={[styles.item_center, styles.course_info]}
@@ -502,48 +509,6 @@ class Table extends Component {
                           </View>
                           {list.length > 1 && <View style={[styles.more]} />}
                         </Touchable>
-                        <Modal
-                          ref="deleteModal"
-                          contentStyle={[
-                            styles.delete_modal,
-                            styles.item_center,
-                            {
-                              bottom: NAV_BAR_HEIGHT*2
-                            }
-                          ]}
-                        >
-                          <Touchable
-                            onPress={() => this.deleteCourse(item.id)}
-                            style={[
-                              styles.delete_course,
-                              styles.delete_button,
-                              styles.center
-                            ]}
-                          >
-                            <Text
-                              style={[
-                                styles.delete_text,
-                                styles.confirm_delete
-                              ]}
-                            >
-                              删除课程
-                            </Text>
-                          </Touchable>
-                          <Touchable
-                            onPress={() => this.refs.deleteModal.hide()}
-                            style={[
-                              styles.cancel_delete,
-                              styles.delete_button,
-                              styles.center
-                            ]}
-                          >
-                            <Text
-                              style={[styles.delete_text, styles.cancel_text]}
-                            >
-                              取消
-                            </Text>
-                          </Touchable>
-                        </Modal>
                       </View>
                     );
                     // }
@@ -612,7 +577,7 @@ class Table extends Component {
         >
           {this.state.courseList.map(course => {
             return (
-              <Touchable onPress={this.hideLesson}>
+              <Touchable onPress={this.hideLesson} onLongPress={this.showDelete(1, course.course)}>
                 <View style={[styles.item_center, styles.modal_cards]}>
                   <Text
                     style={[
@@ -631,6 +596,48 @@ class Table extends Component {
               </Touchable>
             );
           })}
+        </Modal>
+        <Modal
+          ref="deleteModal"
+          contentStyle={[
+            styles.delete_modal,
+            styles.item_center,
+            {
+              bottom: NAV_BAR_HEIGHT * 2
+            }
+          ]}
+        >
+          <Touchable
+            onPress={() => this.deleteCourse}
+            style={[
+              styles.delete_course,
+              styles.delete_button,
+              styles.center
+            ]}
+          >
+            <Text
+              style={[
+                styles.delete_text,
+                styles.confirm_delete
+              ]}
+            >
+              删除{this.state.deleteCourse.course}
+            </Text>
+          </Touchable>
+          <Touchable
+            onPress={() => this.refs.deleteModal.hide()}
+            style={[
+              styles.cancel_delete,
+              styles.delete_button,
+              styles.center
+            ]}
+          >
+            <Text
+              style={[styles.delete_text, styles.cancel_text]}
+            >
+              取消
+            </Text>
+          </Touchable>
         </Modal>
       </View>
     );
