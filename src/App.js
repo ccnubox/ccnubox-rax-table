@@ -74,11 +74,11 @@ const TABLE_TOP_LIMIT =
   (TABLE_INITIAL_TOP / 2 -
     Math.abs(
       700 -
-        (((screen.height / window.devicePixelRatio) * 375) /
-          (screen.width / window.devicePixelRatio) -
-          Number(NAV_BAR_HEIGHT) -
-          headerStyles.style.height / 2 -
-          40)
+      (((screen.height / window.devicePixelRatio) * 375) /
+        (screen.width / window.devicePixelRatio) -
+        Number(NAV_BAR_HEIGHT) -
+        headerStyles.style.height / 2 -
+        40)
     )) *
   2;
 
@@ -102,10 +102,11 @@ class Table extends Component {
         星期六: 5,
         星期日: 6
       }),
-      (this.lesson = new Map()),
+      // (this.lesson = new Map()),
       (this.state = {
         courseList: [],
-        courseArray: getEmptyCourseArray()
+        courseArray: getEmptyCourseArray(),
+        courseDeleting: {}
       });
     //  保存上一次滑动的坐标
     this._previousLeft = TABLE_INITIAL_LEFT;
@@ -140,7 +141,8 @@ class Table extends Component {
   reset = () => {
     this.setState({
       courseList: [],
-      courseArray: getEmptyCourseArray()
+      courseArray: getEmptyCourseArray(),
+      courseDeleting: {}
     });
   };
 
@@ -371,17 +373,32 @@ class Table extends Component {
       course: arr[0],
       flag: false
     };
+    let count = 0;
     arr.map(item => {
       if (this.inArray(item.weeks, week)) {
         result.flag = true;
         result.course = item;
+        count++;
       }
     });
+    // 重复选课的特殊情况，可能会覆盖，选节数比较短的课显示
+    if (count > 1) {
+      arr.map(item => {
+        if (this.inArray(item.weeks, week) && parseInt(item.during) <= parseInt(result.course.during)) {
+          result.course = item;
+        }
+      })
+    }
     return result;
   };
 
-  showDelete = () => {
-    this.refs.deleteModal.show();
+  showDelete = (length, course) => {
+    if (length === 1) {
+      this.setState({
+        courseDeleting: course
+      })
+      this.refs.deleteModal.show();
+    }
   };
 
   checkLogin = () => {
@@ -392,10 +409,10 @@ class Table extends Component {
     return true;
   };
 
-  deleteCourse = id => {
+  deleteCourse = () => {
     if (!this.checkLogin()) return;
     let options = {
-      id,
+      id: this.state.courseDeleting.id,
       sid: this.sid,
       pwd: this.pwd,
       stuInfo: btoa(this.sid + ":" + this.pwd)
@@ -435,118 +452,78 @@ class Table extends Component {
                       .flag;
                     let item = this.hasCourse(list, this.props.currentWeek)
                       .course;
-                    // if (i == parseInt(item.start)) {
-                    return (
-                      <View
-                        style={[
-                          styles.item_center,
-                          styles.daily_lesson,
-                          {
-                            width: this.weekDay[item.day] == day ? 200 : 100,
-                            height: parseInt(item.during) * 100,
-                            position: "absolute",
-                            top: (parseInt(item.start) - 1) * 100
-                          }
-                        ]}
-                      >
-                        <Touchable
-                          onPress={() => {
-                            this.showLesson(list);
-                          }}
-                          delayPressIn={400}
-                          delayPressOut={1000}
-                          delayLongPress={800}
-                          onLongPress={() => this.showDelete(item.id)}
+                    // 如果不加list.length == 1 && flag == false，会出现有课但是由于不是当前周、开始节而不显示
+                    // i === parseInt(item.start) - 1是防止后面的课因节数较多而把重叠的节数少的另一门课覆盖
+                    if (i === parseInt(item.start) - 1 || (list.length === 1 && flag === false)) {
+                      return (
+                        <View
                           style={[
-                            styles.lesson_grid_center,
-                            {
-                              justifyContent:
-                                list.length > 1 ? "space-between" : "center",
-                              height: parseInt(item.during) * 100
-                            }
-                          ]}
-                        >
-                          {list.length > 1 && <View />}
-                          <View>
-                            <View
-                              style={[
-                                styles.item_center,
-                                styles.lesson_item,
-                                {
-                                  backgroundColor: flag
-                                    ? this.colors[parseInt(item.color)]
-                                    : this.grey,
-                                  width: index == day ? 188 : 88
-                                }
-                              ]}
-                            >
-                              {flag ? (
-                                <Text style={[styles.course_text, styles.font]}>
-                                  {item.course}
-                                </Text>
-                              ) : (
-                                <Text style={[styles.course_text, styles.font]}>
-                                  {item.course}
-                                  (非本周)
-                                </Text>
-                              )}
-                            </View>
-                            <View
-                              style={[styles.item_center, styles.course_info]}
-                            >
-                              <Text style={[styles.font]}>{item.teacher}</Text>
-                              <Text style={[styles.font, styles.grey_font]}>
-                                @{item.place}
-                              </Text>
-                            </View>
-                          </View>
-                          {list.length > 1 && <View style={[styles.more]} />}
-                        </Touchable>
-                        <Modal
-                          ref="deleteModal"
-                          contentStyle={[
-                            styles.delete_modal,
                             styles.item_center,
+                            styles.daily_lesson,
                             {
-                              bottom: NAV_BAR_HEIGHT*2
+                              width: this.weekDay[item.day] == day ? 200 : 100,
+                              height: parseInt(item.during) * 100,
+                              position: "absolute",
+                              top: (parseInt(item.start) - 1) * 100
                             }
                           ]}
                         >
                           <Touchable
-                            onPress={() => this.deleteCourse(item.id)}
+                            onPress={() => this.showLesson(list)}
+                            delayPressIn={400}
+                            delayPressOut={1000}
+                            delayLongPress={800}
+                            onLongPress={() => this.showDelete(list.length, item)}
                             style={[
-                              styles.delete_course,
-                              styles.delete_button,
-                              styles.center
+                              styles.lesson_grid_center,
+                              {
+                                justifyContent:
+                                  list.length > 1 ? "space-between" : "center",
+                                height: parseInt(item.during) * 100
+                              }
                             ]}
                           >
-                            <Text
-                              style={[
-                                styles.delete_text,
-                                styles.confirm_delete
-                              ]}
-                            >
-                              删除课程
-                            </Text>
+                            {list.length > 1 && <View />}
+                            <View>
+                              <View
+                                style={[
+                                  styles.item_center,
+                                  styles.lesson_item,
+                                  {
+                                    backgroundColor: flag
+                                      ? this.colors[parseInt(item.color)]
+                                      : this.grey,
+                                    width: index == day ? 188 : 88
+                                  }
+                                ]}
+                              >
+                                {flag ? (
+                                  <Text style={[styles.course_text, styles.font]}>
+                                    {item.course}
+                                  </Text>
+                                ) : (
+                                    <Text style={[styles.course_text, styles.font]}>
+                                      {item.course}
+                                      (非本周)
+                                </Text>
+                                  )}
+                              </View>
+                              <View
+                                style={[styles.item_center, styles.course_info]}
+                              >
+                                <Text style={[styles.font]}>{item.teacher}</Text>
+                                <Text style={[styles.font, styles.grey_font]}>
+                                  @{item.place}
+                                </Text>
+                              </View>
+                            </View>
+                            {list.length > 1 && <View style={[styles.more, {
+                              marginLeft: this.weekDay[item.day] == day ? 180 : 80
+                            }]} />}
                           </Touchable>
-                          <Touchable
-                            onPress={() => this.refs.deleteModal.hide()}
-                            style={[
-                              styles.cancel_delete,
-                              styles.delete_button,
-                              styles.center
-                            ]}
-                          >
-                            <Text
-                              style={[styles.delete_text, styles.cancel_text]}
-                            >
-                              取消
-                            </Text>
-                          </Touchable>
-                        </Modal>
-                      </View>
-                    );
-                    // }
+                        </View>
+                      );
+                    }
                   } else {
                     return (
                       <View
@@ -612,7 +589,12 @@ class Table extends Component {
         >
           {this.state.courseList.map(course => {
             return (
-              <Touchable onPress={this.hideLesson}>
+              <Touchable onPress={this.hideLesson}
+                delayPressIn={400}
+                delayPressOut={1000}
+                delayLongPress={800}
+                onLongPress={() => this.showDelete(1, course)}
+              >
                 <View style={[styles.item_center, styles.modal_cards]}>
                   <Text
                     style={[
@@ -631,6 +613,48 @@ class Table extends Component {
               </Touchable>
             );
           })}
+        </Modal>
+        <Modal
+          ref="deleteModal"
+          contentStyle={[
+            styles.delete_modal,
+            styles.item_center,
+            {
+              bottom: NAV_BAR_HEIGHT * 2
+            }
+          ]}
+        >
+          <Touchable
+            onPress={this.deleteCourse}
+            style={[
+              styles.delete_course,
+              styles.delete_button,
+              styles.center
+            ]}
+          >
+            <Text
+              style={[
+                styles.delete_text,
+                styles.confirm_delete
+              ]}
+            >
+              删除{this.state.courseDeleting.course}
+            </Text>
+          </Touchable>
+          <Touchable
+            onPress={() => this.refs.deleteModal.hide()}
+            style={[
+              styles.cancel_delete,
+              styles.delete_button,
+              styles.center
+            ]}
+          >
+            <Text
+              style={[styles.delete_text, styles.cancel_text]}
+            >
+              取消
+            </Text>
+          </Touchable>
         </Modal>
       </View>
     );

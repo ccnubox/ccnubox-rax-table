@@ -1,5 +1,4 @@
 .app {
-  background-color: #efeff4;
   display: flex;
   flex: 1;
 }
@@ -164,7 +163,6 @@
   position: absolute;
   flex-direction: row;
   display: flex;
-  background-color: #ffffff;
 }
 
 .lesson_column {
@@ -250,7 +248,6 @@
   background-color: #8E8E93;
   width: 20;
   height: 20;
-  margin-left: 80;
 }
 .delete_modal {
   height: 290;
