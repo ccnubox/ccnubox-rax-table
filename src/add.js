@@ -208,7 +208,7 @@ class Add extends Component {
     };
     TableService.addLesson("xxx", SID, "xxx", "ccccc", course)
       .then(res => {
-        native.back();
+        native.backToTableMain();
       })
       .catch((e) => {
         alert(JSON.stringify(e));

@@ -51,6 +51,7 @@ if (window.location.search) {
 }
 const STATUS_BAR_HEIGHT = Number(qd.statusBarHeight[0]);
 const NAV_BAR_HEIGHT = Number(qd.navBarHeight[0]);
+const REFRESH_FLAG = Boolean(Number(qd.refresh[0]));
 const START_COUNT_DAY = qd.startCountDay[0];
 
 const TABLE_INITIAL_LEFT = 80;
@@ -208,6 +209,11 @@ class Table extends Component {
         this.sid = res.sid;
         this.pwd = res.pwd;
         this.stuInfo = btoa(this.sid + ":" + "pwd");
+        // URL 传参，强制刷新
+        if (REFRESH_FLAG) {
+          this.getCourseFromServer();
+          return;
+        }
         native.getCachedTable((res) => {
           if (res.code === "404") {
             this.getCourseFromServer();
@@ -218,7 +224,6 @@ class Table extends Component {
             })
           }
         })
-        // this.getCourseFromServer();
       } else {
         // 理论上不会走到这个分支，因为课程表有登录 guard
         alert("未登录");
@@ -422,8 +427,9 @@ class Table extends Component {
         this.refs.deleteModal.hide();
         this.getCourse();
       })
-      .catch(() => {
-        alert("删除失败");
+      .catch((e) => {
+        alert(JSON.stringify(e))
+        // alert("删除失败");
       });
   };
 

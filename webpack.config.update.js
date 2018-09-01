@@ -7,7 +7,7 @@ module.exports = function update(webpackConfig) {
   webpackConfig.entry["com.muxistudio.table.main"] = [
     path.resolve(__dirname, "./src/index.js")
   ];
-  webpackConfig.entry["com.muxistudio.tabble.add"] = [
+  webpackConfig.entry["com.muxistudio.table.add"] = [
     path.resolve(__dirname, "./src/second.js")
   ];
   console.log("current env", process.env.NODE_ENV);

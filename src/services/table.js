@@ -31,7 +31,10 @@ const TableService = {
     });
   },
   deleteLesson(options) {
+    alert(JSON.stringify(options))
     let headers = {
+      'Bigipserverpool': "xxx",
+      'Jsessionid': "xxx",
       'Accept': 'application/json',
       'Sid': options.sid,
       'Authorization': `Basic ${options.token}`
