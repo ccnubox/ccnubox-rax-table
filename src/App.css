@@ -1,6 +1,7 @@
 .app {
   display: flex;
   flex: 1;
+  background-color: #ffffff;
 }
 
 .text {
@@ -186,9 +187,9 @@
 }
 
 .lesson_modal {
-  width: 300;
+  width: 320;
   position: absolute;
-  left: 225;
+  left: 215;
   top: 170;
   background-color: transparent;
 }
@@ -234,8 +235,8 @@
 .modal_cards {
   margin-bottom: 50;
   background-color: #ffffff;
-  width: 300;
-  height: 150;
+  width: 320;
+  height: 200;
   border-radius: 12;
 }
 .grey_font {

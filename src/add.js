@@ -246,7 +246,7 @@ class Add extends Component {
             style={[styles.input_box, styles.time_choose]}
           >
             <Text style={[styles.input_word, styles.center, styles.time_word]}>
-              {this.state.timeHasValue ? "修改上课周次":"选择上课周次"}
+              {this.state.timeHasValue ? "修改上课时间":"选择上课时间"}
             </Text>
           </Touchable>
           <TextInput
