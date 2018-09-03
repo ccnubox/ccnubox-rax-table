@@ -10,6 +10,7 @@ import Modal from "rax-modal";
 const native = require("@weex-module/test");
 import Header from "./header";
 import { parseSearchString } from "../box-ui/util";
+import Image from "rax-image";
 
 var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
 if (day == -1) {
@@ -434,8 +435,8 @@ class Table extends Component {
   };
 
   calcWeek = (weeks) => {
-    let arr = weeks.split(",").map(i => {return parseInt(i)})
-    arr.sort(function(a, b) {
+    let arr = weeks.split(",").map(i => { return parseInt(i) })
+    arr.sort(function (a, b) {
       return a - b;
     });
     let isOdd = true;
@@ -448,7 +449,7 @@ class Table extends Component {
         isOdd = false;
       }
     })
-    
+
     // 判断是否连续周上课， 若为否则不为“单双全”的连续周显示，而是显示所有周数 weeks
     let len = arr.length;
 
@@ -555,9 +556,10 @@ class Table extends Component {
                                 </Text>
                               </View>
                             </View>
-                            {list.length > 1 && <View style={[styles.more, {
-                              marginLeft: this.weekDay[item.day] == day ? 180 : 80
-                            }]} />}
+                            {list.length > 1 && <Image source={require("./assets/mark.png")}
+                              resizeMode="cover" style={[styles.more, {
+                                marginLeft: this.weekDay[item.day] == day ? 178 : 78
+                              }]} />}
                           </Touchable>
                         </View>
                       );
