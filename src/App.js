@@ -10,6 +10,7 @@ import Modal from "rax-modal";
 const native = require("@weex-module/test");
 import Header from "./header";
 import { parseSearchString } from "../box-ui/util";
+import Image from "rax-image";
 
 var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
 if (day == -1) {
@@ -457,6 +458,38 @@ class Table extends Component {
       });
   };
 
+  calcWeek = (weeks) => {
+    let arr = weeks.split(",").map(i => { return parseInt(i) })
+    arr.sort(function (a, b) {
+      return a - b;
+    });
+    let isOdd = true;
+    let isEven = true;
+    arr.map(n => {
+      if (n % 2 !== 0) {
+        isEven = false;
+      }
+      if (n % 2 !== 1) {
+        isOdd = false;
+      }
+    })
+
+    // 判断是否连续周上课， 若为否则不为“单双全”的连续周显示，而是显示所有周数 weeks
+    let len = arr.length;
+
+    // 连续单或双周
+    if ((isOdd || isEven) && (arr[len - 1] - arr[0]) / 2 + 1 === len) {
+      return isOdd ? arr[0] + "-" + arr[len - 1] + "周（单）" : arr[0] + "-" + arr[len - 1] + "周（双）";
+    }
+    // 连续所有周
+    if (!isEven && !isOdd && arr[len - 1] - arr[0] + 1 === len) {
+      return arr[0] + "-" + arr[len - 1] + "周"
+    }
+
+    // 非连续周
+    return weeks + "周"
+  }
+
   render() {
     return (
       <View>
@@ -558,17 +591,10 @@ class Table extends Component {
                                 </Text>
                               </View>
                             </View>
-                            {list.length > 1 && (
-                              <View
-                                style={[
-                                  styles.more,
-                                  {
-                                    marginLeft:
-                                      this.weekDay[item.day] == day ? 180 : 80
-                                  }
-                                ]}
-                              />
-                            )}
+                            {list.length > 1 && <Image source={require("./assets/mark.png")}
+                              resizeMode="cover" style={[styles.more, {
+                                marginLeft: this.weekDay[item.day] == day ? 178 : 78
+                              }]} />}
                           </Touchable>
                         </View>
                       );
@@ -632,7 +658,7 @@ class Table extends Component {
           contentStyle={[
             styles.lesson_modal,
             {
-              height: 200 * this.state.courseList.length - 50
+              height: 250 * this.state.courseList.length - 50
             }
           ]}
         >
@@ -658,6 +684,7 @@ class Table extends Component {
                     {course.course}
                   </Text>
                   <Text style={[styles.modal_font]}>{course.teacher}</Text>
+                  <Text style={[styles.modal_font]}>{this.calcWeek(course.weeks)}</Text>
                   <Text style={[styles.modal_font]}>@{course.place}</Text>
                 </View>
               </Touchable>
