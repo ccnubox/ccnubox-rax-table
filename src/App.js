@@ -75,13 +75,15 @@ const TABLE_TOP_LIMIT =
   (TABLE_INITIAL_TOP / 2 -
     Math.abs(
       700 -
-      (((screen.height / window.devicePixelRatio) * 375) /
-        (screen.width / window.devicePixelRatio) -
-        Number(NAV_BAR_HEIGHT) -
-        headerStyles.style.height / 2 -
-        40)
+        (((screen.height / window.devicePixelRatio) * 375) /
+          (screen.width / window.devicePixelRatio) -
+          Number(NAV_BAR_HEIGHT) -
+          headerStyles.style.height / 2 -
+          40)
     )) *
   2;
+
+let ERROR_MESSAGE = "服务端错误，请求课程表失败";
 
 // alert(screen.height / window.devicePixelRatio)
 class Table extends Component {
@@ -137,6 +139,11 @@ class Table extends Component {
 
   componentWillMount() {
     this.initCourseData();
+    TableService.getErrorMessage().then(res => {
+      if (Object.keys(res).length > 0) {
+        ERROR_MESSAGE = res.msg;
+      }
+    });
   }
 
   reset = () => {
@@ -171,12 +178,18 @@ class Table extends Component {
 
   getCourseFromServerImpl = options => {
     let _CourseArray = this.state.courseArray;
-    TableService.getTableList(options).then(res => {
-      native.saveCachedTable(JSON.stringify(res));
-      this.setState({
-        courseArray: this.setCourseArray(res, _CourseArray)
+    TableService.getTableList(options)
+      .then(res => {
+        native.reportInsightApiEvent("getTableList", "success", "null");
+        native.saveCachedTable(JSON.stringify(res));
+        this.setState({
+          courseArray: this.setCourseArray(res, _CourseArray)
+        });
+      })
+      .catch(e => {
+        native.reportInsightApiEvent("getTableList", "error", "500");
+        alert(ERROR_MESSAGE);
       });
-    });
   };
 
   getCourseFromServer = () => {
@@ -192,7 +205,12 @@ class Table extends Component {
             Bigipserverpool: res.cookieB
           }
         });
+      } else if (res.code === "401") {
+        native.reportInsightApiEvent("getCookieForTable", "error", "401");
+        native.logout();
+        alert("学号或密码错误，请检查是否修改了 one.ccnu.edu.cn 的密码");
       } else {
+        native.reportInsightApiEvent("getCookieForTable", "error", "500");
         // 兜底：如果模拟登陆失败，不带 cookie 请求服务端
         this.getCourseFromServerImpl({
           sid: this.sid,
@@ -214,16 +232,19 @@ class Table extends Component {
           this.getCourseFromServer();
           return;
         }
-        native.getCachedTable((res) => {
+        native.getCachedTable(res => {
           if (res.code === "404") {
             this.getCourseFromServer();
           } else {
             let _CourseArray = this.state.courseArray;
             this.setState({
-              courseArray: this.setCourseArray(JSON.parse(res.result), _CourseArray)
-            })
+              courseArray: this.setCourseArray(
+                JSON.parse(res.result),
+                _CourseArray
+              )
+            });
           }
-        })
+        });
       } else {
         // 理论上不会走到这个分支，因为课程表有登录 guard
         alert("未登录");
@@ -389,10 +410,13 @@ class Table extends Component {
     // 重复选课的特殊情况，可能会覆盖，选节数比较短的课显示
     if (count > 1) {
       arr.map(item => {
-        if (this.inArray(item.weeks, week) && parseInt(item.during) <= parseInt(result.course.during)) {
+        if (
+          this.inArray(item.weeks, week) &&
+          parseInt(item.during) <= parseInt(result.course.during)
+        ) {
           result.course = item;
         }
-      })
+      });
     }
     return result;
   };
@@ -401,7 +425,7 @@ class Table extends Component {
     if (length === 1) {
       this.setState({
         courseDeleting: course
-      })
+      });
       this.refs.deleteModal.show();
     }
   };
@@ -427,8 +451,8 @@ class Table extends Component {
         this.refs.deleteModal.hide();
         this.getCourse();
       })
-      .catch((e) => {
-        alert(JSON.stringify(e))
+      .catch(e => {
+        alert(JSON.stringify(e));
         // alert("删除失败");
       });
   };
@@ -460,7 +484,10 @@ class Table extends Component {
                       .course;
                     // 如果不加list.length == 1 && flag == false，会出现有课但是由于不是当前周、开始节而不显示
                     // i === parseInt(item.start) - 1是防止后面的课因节数较多而把重叠的节数少的另一门课覆盖
-                    if (i === parseInt(item.start) - 1 || (list.length === 1 && flag === false)) {
+                    if (
+                      i === parseInt(item.start) - 1 ||
+                      (list.length === 1 && flag === false)
+                    ) {
                       return (
                         <View
                           style={[
@@ -479,7 +506,9 @@ class Table extends Component {
                             delayPressIn={400}
                             delayPressOut={1000}
                             delayLongPress={800}
-                            onLongPress={() => this.showDelete(list.length, item)}
+                            onLongPress={() =>
+                              this.showDelete(list.length, item)
+                            }
                             style={[
                               styles.lesson_grid_center,
                               {
@@ -504,28 +533,42 @@ class Table extends Component {
                                 ]}
                               >
                                 {flag ? (
-                                  <Text style={[styles.course_text, styles.font]}>
+                                  <Text
+                                    style={[styles.course_text, styles.font]}
+                                  >
                                     {item.course}
                                   </Text>
                                 ) : (
-                                    <Text style={[styles.course_text, styles.font]}>
-                                      {item.course}
-                                      (非本周)
-                                </Text>
-                                  )}
+                                  <Text
+                                    style={[styles.course_text, styles.font]}
+                                  >
+                                    {item.course}
+                                    (非本周)
+                                  </Text>
+                                )}
                               </View>
                               <View
                                 style={[styles.item_center, styles.course_info]}
                               >
-                                <Text style={[styles.font]}>{item.teacher}</Text>
+                                <Text style={[styles.font]}>
+                                  {item.teacher}
+                                </Text>
                                 <Text style={[styles.font, styles.grey_font]}>
                                   @{item.place}
                                 </Text>
                               </View>
                             </View>
-                            {list.length > 1 && <View style={[styles.more, {
-                              marginLeft: this.weekDay[item.day] == day ? 180 : 80
-                            }]} />}
+                            {list.length > 1 && (
+                              <View
+                                style={[
+                                  styles.more,
+                                  {
+                                    marginLeft:
+                                      this.weekDay[item.day] == day ? 180 : 80
+                                  }
+                                ]}
+                              />
+                            )}
                           </Touchable>
                         </View>
                       );
@@ -595,7 +638,8 @@ class Table extends Component {
         >
           {this.state.courseList.map(course => {
             return (
-              <Touchable onPress={this.hideLesson}
+              <Touchable
+                onPress={this.hideLesson}
                 delayPressIn={400}
                 delayPressOut={1000}
                 delayLongPress={800}
@@ -632,34 +676,18 @@ class Table extends Component {
         >
           <Touchable
             onPress={this.deleteCourse}
-            style={[
-              styles.delete_course,
-              styles.delete_button,
-              styles.center
-            ]}
+            style={[styles.delete_course, styles.delete_button, styles.center]}
           >
-            <Text
-              style={[
-                styles.delete_text,
-                styles.confirm_delete
-              ]}
-            >
-              删除{this.state.courseDeleting.course}
+            <Text style={[styles.delete_text, styles.confirm_delete]}>
+              删除
+              {this.state.courseDeleting.course}
             </Text>
           </Touchable>
           <Touchable
             onPress={() => this.refs.deleteModal.hide()}
-            style={[
-              styles.cancel_delete,
-              styles.delete_button,
-              styles.center
-            ]}
+            style={[styles.cancel_delete, styles.delete_button, styles.center]}
           >
-            <Text
-              style={[styles.delete_text, styles.cancel_text]}
-            >
-              取消
-            </Text>
+            <Text style={[styles.delete_text, styles.cancel_text]}>取消</Text>
           </Touchable>
         </Modal>
       </View>
