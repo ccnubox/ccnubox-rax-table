@@ -18,7 +18,7 @@ if (window.location.search) {
 } else {
   alert("参数缺失错误 " + window.location);
 }
-const SID = qd.sid[0]
+const SID = qd.sid[0];
 
 class Add extends Component {
   constructor(props) {
@@ -40,7 +40,7 @@ class Add extends Component {
       choosingOdd: false,
       choosingEven: false,
       choosingAll: false,
-      timeHasValue: false,
+      timeHasValue: false
     };
     (this.weeks = []),
       (this.weekdays = [
@@ -72,23 +72,23 @@ class Add extends Component {
     }
   }
 
-  onCourseChange = (event) => {
+  onCourseChange = event => {
     this.setState({
       course: event.nativeEvent.text
-    })
-  }
+    });
+  };
 
-  onTeacherChange = (event) => {
+  onTeacherChange = event => {
     this.setState({
       teacher: event.nativeEvent.text
-    })
-  }
+    });
+  };
 
-  onPlaceChange = (event) => {
+  onPlaceChange = event => {
     this.setState({
       place: event.nativeEvent.text
-    })
-  }
+    });
+  };
 
   showWeek = () => {
     this.refs.weekModal.show();
@@ -188,12 +188,17 @@ class Add extends Component {
       this.refs.timeModal.hide();
       this.setState({
         timeHasValue: true
-      })
+      });
     }
   };
   confirmAdd = () => {
-    if (this.state.course === "" || this.state.teacher === "" || this.state.weeksArray.length === 0 || this.state.place === "" ) {
-      alert("请输入完整的信息")
+    if (
+      this.state.course === "" ||
+      this.state.teacher === "" ||
+      this.state.weeksArray.length === 0 ||
+      this.state.place === ""
+    ) {
+      alert("请输入完整的信息");
       return;
     }
     let course = {
@@ -210,8 +215,10 @@ class Add extends Component {
       .then(res => {
         native.backToTableMain();
       })
-      .catch((e) => {
-        alert(JSON.stringify(e));
+      .catch(e => {
+        native.reportInsightApiEvent("addCourse", "error", e.code);
+        alert("添加课程错误，请重试");
+        native.backToTableMain();
       });
   };
   render() {
@@ -238,7 +245,9 @@ class Add extends Component {
             style={[styles.input_box, styles.time_choose]}
           >
             <Text style={[styles.input_word, styles.center, styles.time_word]}>
-              {this.state.weeksArray.length === 0 ? "选择上课周次":"修改上课周次"}
+              {this.state.weeksArray.length === 0
+                ? "选择上课周次"
+                : "修改上课周次"}
             </Text>
           </Touchable>
           <Touchable
@@ -246,7 +255,7 @@ class Add extends Component {
             style={[styles.input_box, styles.time_choose]}
           >
             <Text style={[styles.input_word, styles.center, styles.time_word]}>
-              {this.state.timeHasValue ? "修改上课时间":"选择上课时间"}
+              {this.state.timeHasValue ? "修改上课时间" : "选择上课时间"}
             </Text>
           </Touchable>
           <TextInput
@@ -390,11 +399,15 @@ class Add extends Component {
             </View>
           </View>
         </Modal>
-        <Modal ref="timeModal" contentStyle={[styles.modal]} onHide={() => {
-          this.setState({
-            timeHasValue: true
-          })
-        }}>
+        <Modal
+          ref="timeModal"
+          contentStyle={[styles.modal]}
+          onHide={() => {
+            this.setState({
+              timeHasValue: true
+            });
+          }}
+        >
           <View style={[styles.modal_header, styles.center]}>
             <Touchable onPress={this.hideTime}>
               <Text style={[styles.purple_text]}>取消</Text>

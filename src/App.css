@@ -102,8 +102,15 @@
   border-bottom: 1 solid #efeff4;
 }
 
-.button_text,
-.option_item {
+.fuck {
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding: 10 0;
+  flex-direction: row;
+}
+
+.button_text{
   padding: 10 0;
 }
 
@@ -229,7 +236,12 @@
   font-size: 30;
 }
 .add {
+  justify-content: center;
+  align-items: flex-end;
+  width: 200;
+  height: 50;
   position: absolute;
+  padding-right: 10;
   right: 50;
 }
 .modal_cards {

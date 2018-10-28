@@ -25,7 +25,7 @@ const TableService = {
     }
     return request({
       method: "GET",
-      url: "https://ccnubox.muxixyz.com/api/table/cache",
+      url: "https://ccnubox.muxixyz.com/api/table/cache/",
       headers
     });
   },
@@ -43,7 +43,6 @@ const TableService = {
     });
   },
   deleteLesson(options) {
-    alert(JSON.stringify(options));
     let headers = {
       Bigipserverpool: "xxx",
       Jsessionid: "xxx",

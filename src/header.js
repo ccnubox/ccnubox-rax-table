@@ -193,39 +193,41 @@ class Header extends Component {
                       return (
                         <View style={styles.option_container}>
                           <View
-                            style={[
-                              styles.center,
-                              styles.option_item,
-                              {
-                                backgroundColor:
-                                  this.state.choosedWeek == index + 1
-                                    ? "#D7D8D9"
-                                    : "#ffffff"
-                              }
-                            ]}
+                            style={[styles.center, styles.option_item]}
                             onClick={() => {
                               this.choosingWeek(index);
                             }}
                           >
-                            {this.state.currentWeek == index + 1 && (
-                              <View style={[styles.equal_item]} />
-                            )}
-                            <Text
-                              style={[styles.option_text, styles.option_size]}
+                            <View
+                              style={[
+                                styles.fuck,
+                                this.state.choosedWeek == index + 1
+                                  ? {
+                                      backgroundColor: "#D7D8D9"
+                                    }
+                                  : {}
+                              ]}
                             >
-                              第{this.WeekOptions[index]}周
-                            </Text>
-                            {this.state.currentWeek == index + 1 && (
+                              {this.state.currentWeek == index + 1 && (
+                                <View style={[styles.equal_item]} />
+                              )}
                               <Text
-                                style={[
-                                  styles.equal_item,
-                                  styles.font,
-                                  styles.current
-                                ]}
+                                style={[styles.option_text, styles.option_size]}
                               >
-                                当前
+                                第{this.WeekOptions[index]}周
                               </Text>
-                            )}
+                              {this.state.currentWeek == index + 1 && (
+                                <Text
+                                  style={[
+                                    styles.equal_item,
+                                    styles.font,
+                                    styles.current
+                                  ]}
+                                >
+                                  当前
+                                </Text>
+                              )}
+                            </View>
                           </View>
                         </View>
                       );
@@ -245,23 +247,24 @@ class Header extends Component {
               </View>
             </View>
           ) : null}
-          <View style={[styles.add, this.props.btnStyle]}>
-            <Touchable
-              onPress={() => {
-                native.getStuInfo(res => {
-                  if (res.code === "200") {
-                    let sid = res.sid;
-                    native.push(`ccnubox://table.add?sid=${sid}`);
-                  } else {
-                    // 理论上不会走到这个分支，因为课程表有登录 guard
-                    alert("请登录");
-                  }
-                });
-              }}
-            >
+          <Touchable
+            onPress={() => {
+              native.getStuInfo(res => {
+                if (res.code === "200") {
+                  let sid = res.sid;
+                  native.push(`ccnubox://table.add?sid=${sid}`);
+                } else {
+                  // 理论上不会走到这个分支，因为课程表有登录 guard
+                  alert("请登录");
+                }
+              });
+            }}
+            style={[styles.add, this.props.btnStyle]}
+          >
+            <View >
               <Text style={[styles.fresh_text]}>添课</Text>
-            </Touchable>
-          </View>
+            </View>
+          </Touchable>
         </View>
       </View>
     );

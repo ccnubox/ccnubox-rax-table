@@ -108,6 +108,7 @@ class Table extends Component {
       }),
       // (this.lesson = new Map()),
       (this.state = {
+        loading: true,
         courseList: [],
         courseArray: getEmptyCourseArray(),
         courseDeleting: {}
@@ -186,8 +187,10 @@ class Table extends Component {
         this.setState({
           courseArray: this.setCourseArray(res, _CourseArray)
         });
+        native.changeLoadingStatus(true);
       })
       .catch(e => {
+        native.changeLoadingStatus(true);
         native.reportInsightApiEvent("getTableList", "error", "500");
         alert(ERROR_MESSAGE);
       });
@@ -196,7 +199,12 @@ class Table extends Component {
   getCourseFromServer = () => {
     if (!this.checkLogin()) return;
     this.reset();
+    native.changeLoadingStatus(false);
+
     native.getCookie(res => {
+      native.reportInsightApiEvent("getCookieForTable", "error", "500");
+      // 兜底：如果模拟登陆失败，不带 cookie 请求服务端
+
       if (res.code === "200") {
         this.getCourseFromServerImpl({
           sid: this.sid,
@@ -207,12 +215,12 @@ class Table extends Component {
           }
         });
       } else if (res.code === "401") {
+        native.changeLoadingStatus(true);
         native.reportInsightApiEvent("getCookieForTable", "error", "401");
-        native.logout();
-        alert("学号或密码错误，请检查是否修改了 one.ccnu.edu.cn 的密码");
+        alert(
+          "学号或密码错误，请检查是否修改了 one.ccnu.edu.cn 的密码。如修改了密码，请在设置中退出登录后进入课程表重新登录"
+        );
       } else {
-        native.reportInsightApiEvent("getCookieForTable", "error", "500");
-        // 兜底：如果模拟登陆失败，不带 cookie 请求服务端
         this.getCourseFromServerImpl({
           sid: this.sid,
           token: this.stuInfo
@@ -450,17 +458,20 @@ class Table extends Component {
     TableService.deleteLesson(options)
       .then(res => {
         this.refs.deleteModal.hide();
-        this.getCourse();
+        this.getCourseFromServer();
       })
       .catch(e => {
-        alert(JSON.stringify(e));
-        // alert("删除失败");
+        this.refs.deleteModal.hide();
+        native.reportInsightApiEvent("deleteCourse", "error", e.code);
+        alert("删除课程失败，请重试");
       });
   };
 
-  calcWeek = (weeks) => {
-    let arr = weeks.split(",").map(i => { return parseInt(i) })
-    arr.sort(function (a, b) {
+  calcWeek = weeks => {
+    let arr = weeks.split(",").map(i => {
+      return parseInt(i);
+    });
+    arr.sort(function(a, b) {
       return a - b;
     });
     let isOdd = true;
@@ -472,153 +483,161 @@ class Table extends Component {
       if (n % 2 !== 1) {
         isOdd = false;
       }
-    })
+    });
 
     // 判断是否连续周上课， 若为否则不为“单双全”的连续周显示，而是显示所有周数 weeks
     let len = arr.length;
 
     // 连续单或双周
     if ((isOdd || isEven) && (arr[len - 1] - arr[0]) / 2 + 1 === len) {
-      return isOdd ? arr[0] + "-" + arr[len - 1] + "周（单）" : arr[0] + "-" + arr[len - 1] + "周（双）";
+      return isOdd
+        ? arr[0] + "-" + arr[len - 1] + "周（单）"
+        : arr[0] + "-" + arr[len - 1] + "周（双）";
     }
     // 连续所有周
     if (!isEven && !isOdd && arr[len - 1] - arr[0] + 1 === len) {
-      return arr[0] + "-" + arr[len - 1] + "周"
+      return arr[0] + "-" + arr[len - 1] + "周";
     }
 
     // 非连续周
-    return weeks + "周"
-  }
+    return weeks + "周";
+  };
+
+  renderTableCanvas = () => {
+    return (
+      <View
+        style={[styles.lesson_table]}
+        ref={table => {
+          this.table = table;
+        }}
+        {...this._panResponder.panHandlers}
+      >
+        {this.state.courseArray.map((column, index) => {
+          return (
+            <View
+              style={
+                day == index
+                  ? [styles.lesson_column, styles.grid_today]
+                  : [styles.lesson_column, styles.grid_width]
+              }
+            >
+              {column.map((list, i) => {
+                if (list.length > 0) {
+                  let flag = this.hasCourse(list, this.props.currentWeek).flag;
+                  let item = this.hasCourse(list, this.props.currentWeek)
+                    .course;
+                  // 如果不加list.length == 1 && flag == false，会出现有课但是由于不是当前周、开始节而不显示
+                  // i === parseInt(item.start) - 1是防止后面的课因节数较多而把重叠的节数少的另一门课覆盖
+                  if (
+                    i === parseInt(item.start) - 1 ||
+                    (list.length === 1 && flag === false)
+                  ) {
+                    return (
+                      <View
+                        style={[
+                          styles.item_center,
+                          styles.daily_lesson,
+                          {
+                            width: this.weekDay[item.day] == day ? 200 : 100,
+                            height: parseInt(item.during) * 100,
+                            position: "absolute",
+                            top: (parseInt(item.start) - 1) * 100
+                          }
+                        ]}
+                      >
+                        <Touchable
+                          onPress={() => this.showLesson(list)}
+                          delayPressIn={400}
+                          delayPressOut={1000}
+                          delayLongPress={800}
+                          onLongPress={() => this.showDelete(list.length, item)}
+                          style={[
+                            styles.lesson_grid_center,
+                            {
+                              justifyContent:
+                                list.length > 1 ? "space-between" : "center",
+                              height: parseInt(item.during) * 100
+                            }
+                          ]}
+                        >
+                          {list.length > 1 && <View />}
+                          <View>
+                            <View
+                              style={[
+                                styles.item_center,
+                                styles.lesson_item,
+                                {
+                                  backgroundColor: flag
+                                    ? this.colors[parseInt(item.color)]
+                                    : this.grey,
+                                  width: index == day ? 188 : 88
+                                }
+                              ]}
+                            >
+                              {flag ? (
+                                <Text style={[styles.course_text, styles.font]}>
+                                  {item.course}
+                                </Text>
+                              ) : (
+                                <Text style={[styles.course_text, styles.font]}>
+                                  {item.course}
+                                  (非本周)
+                                </Text>
+                              )}
+                            </View>
+                            <View
+                              style={[styles.item_center, styles.course_info]}
+                            >
+                              <Text style={[styles.font]}>{item.teacher}</Text>
+                              <Text style={[styles.font, styles.grey_font]}>
+                                @{item.place}
+                              </Text>
+                            </View>
+                          </View>
+                          {list.length > 1 && (
+                            <Image
+                              source={require("./assets/mark.png")}
+                              resizeMode="cover"
+                              style={[
+                                styles.more,
+                                {
+                                  marginLeft:
+                                    this.weekDay[item.day] == day ? 178 : 78
+                                }
+                              ]}
+                            />
+                          )}
+                        </Touchable>
+                      </View>
+                    );
+                  }
+                } else {
+                  return (
+                    <View
+                      style={[
+                        {
+                          width: index == day ? 200 : 100,
+                          position: "absolute",
+                          top: i * 100
+                        },
+                        styles.daily_lesson,
+                        styles.grid_height
+                      ]}
+                    />
+                  );
+                }
+              })}
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
 
   render() {
     return (
       <View>
-        <View
-          style={[styles.lesson_table]}
-          ref={table => {
-            this.table = table;
-          }}
-          {...this._panResponder.panHandlers}
-        >
-          {this.state.courseArray.map((column, index) => {
-            return (
-              <View
-                style={
-                  day == index
-                    ? [styles.lesson_column, styles.grid_today]
-                    : [styles.lesson_column, styles.grid_width]
-                }
-              >
-                {column.map((list, i) => {
-                  if (list.length > 0) {
-                    let flag = this.hasCourse(list, this.props.currentWeek)
-                      .flag;
-                    let item = this.hasCourse(list, this.props.currentWeek)
-                      .course;
-                    // 如果不加list.length == 1 && flag == false，会出现有课但是由于不是当前周、开始节而不显示
-                    // i === parseInt(item.start) - 1是防止后面的课因节数较多而把重叠的节数少的另一门课覆盖
-                    if (
-                      i === parseInt(item.start) - 1 ||
-                      (list.length === 1 && flag === false)
-                    ) {
-                      return (
-                        <View
-                          style={[
-                            styles.item_center,
-                            styles.daily_lesson,
-                            {
-                              width: this.weekDay[item.day] == day ? 200 : 100,
-                              height: parseInt(item.during) * 100,
-                              position: "absolute",
-                              top: (parseInt(item.start) - 1) * 100
-                            }
-                          ]}
-                        >
-                          <Touchable
-                            onPress={() => this.showLesson(list)}
-                            delayPressIn={400}
-                            delayPressOut={1000}
-                            delayLongPress={800}
-                            onLongPress={() =>
-                              this.showDelete(list.length, item)
-                            }
-                            style={[
-                              styles.lesson_grid_center,
-                              {
-                                justifyContent:
-                                  list.length > 1 ? "space-between" : "center",
-                                height: parseInt(item.during) * 100
-                              }
-                            ]}
-                          >
-                            {list.length > 1 && <View />}
-                            <View>
-                              <View
-                                style={[
-                                  styles.item_center,
-                                  styles.lesson_item,
-                                  {
-                                    backgroundColor: flag
-                                      ? this.colors[parseInt(item.color)]
-                                      : this.grey,
-                                    width: index == day ? 188 : 88
-                                  }
-                                ]}
-                              >
-                                {flag ? (
-                                  <Text
-                                    style={[styles.course_text, styles.font]}
-                                  >
-                                    {item.course}
-                                  </Text>
-                                ) : (
-                                  <Text
-                                    style={[styles.course_text, styles.font]}
-                                  >
-                                    {item.course}
-                                    (非本周)
-                                  </Text>
-                                )}
-                              </View>
-                              <View
-                                style={[styles.item_center, styles.course_info]}
-                              >
-                                <Text style={[styles.font]}>
-                                  {item.teacher}
-                                </Text>
-                                <Text style={[styles.font, styles.grey_font]}>
-                                  @{item.place}
-                                </Text>
-                              </View>
-                            </View>
-                            {list.length > 1 && <Image source={require("./assets/mark.png")}
-                              resizeMode="cover" style={[styles.more, {
-                                marginLeft: this.weekDay[item.day] == day ? 178 : 78
-                              }]} />}
-                          </Touchable>
-                        </View>
-                      );
-                    }
-                  } else {
-                    return (
-                      <View
-                        style={[
-                          {
-                            width: index == day ? 200 : 100,
-                            position: "absolute",
-                            top: i * 100
-                          },
-                          styles.daily_lesson,
-                          styles.grid_height
-                        ]}
-                      />
-                    );
-                  }
-                })}
-              </View>
-            );
-          })}
-        </View>
+        {this.renderTableCanvas()}
         <View
           ref={orderList => {
             this.orderList = orderList;
@@ -684,7 +703,9 @@ class Table extends Component {
                     {course.course}
                   </Text>
                   <Text style={[styles.modal_font]}>{course.teacher}</Text>
-                  <Text style={[styles.modal_font]}>{this.calcWeek(course.weeks)}</Text>
+                  <Text style={[styles.modal_font]}>
+                    {this.calcWeek(course.weeks)}
+                  </Text>
                   <Text style={[styles.modal_font]}>@{course.place}</Text>
                 </View>
               </Touchable>
