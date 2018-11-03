@@ -48,7 +48,7 @@ const TableService = {
       Jsessionid: "xxx",
       Accept: "application/json",
       Sid: options.sid,
-      Authorization: `Basic ${options.token}`
+      Authorization: "Basic " + btoa(options.sid + ":" + options.pwd)
     };
 
     return request({

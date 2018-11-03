@@ -10,6 +10,7 @@ import BoxButton from "../box-ui/common/button";
 import Modal from "rax-modal";
 import { parseSearchString } from "../box-ui/util";
 const native = require("@weex-module/test");
+import Toast from 'universal-toast';
 
 let qd = {};
 // 获取查询参数
@@ -213,6 +214,7 @@ class Add extends Component {
     };
     TableService.addLesson("xxx", SID, "xxx", "ccccc", course)
       .then(res => {
+        Toast.show('添加课程成功！', Toast.SHORT)
         native.backToTableMain();
       })
       .catch(e => {
@@ -229,12 +231,14 @@ class Add extends Component {
             placeholder="请输入课程名称"
             value={this.state.course}
             style={[styles.input_box]}
+            onInput={this.onCourseChange}
             onChange={this.onCourseChange}
           />
           <TextInput
             placeholder="请输入任教教师"
             value={this.state.teacher}
             style={[styles.input_box]}
+            onInput={this.onTeacherChange}
             onChange={this.onTeacherChange}
           />
         </View>
@@ -262,6 +266,7 @@ class Add extends Component {
             placeholder="请输入上课地点"
             value={this.state.place}
             style={[styles.input_box]}
+            onInput={this.onPlaceChange}
             onChange={this.onPlaceChange}
           />
         </View>

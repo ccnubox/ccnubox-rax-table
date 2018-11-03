@@ -11,6 +11,7 @@ const native = require("@weex-module/test");
 import Header from "./header";
 import { parseSearchString } from "../box-ui/util";
 import Image from "rax-image";
+import Toast from 'universal-toast';
 
 var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
 if (day == -1) {
@@ -252,9 +253,11 @@ class Table extends Component {
                 _CourseArray
               )
             });
+            native.changeLoadingStatus(true);
           }
         });
       } else {
+        native.changeLoadingStatus(true);
         // 理论上不会走到这个分支，因为课程表有登录 guard
         alert("未登录");
       }
@@ -449,6 +452,7 @@ class Table extends Component {
 
   deleteCourse = () => {
     if (!this.checkLogin()) return;
+
     let options = {
       id: this.state.courseDeleting.id,
       sid: this.sid,
@@ -457,12 +461,15 @@ class Table extends Component {
     };
     TableService.deleteLesson(options)
       .then(res => {
+        this.refs.lesson.hide();
         this.refs.deleteModal.hide();
+        Toast.show("删除课程成功！", Toast.SHORT);
         this.getCourseFromServer();
       })
       .catch(e => {
+        this.refs.lesson.hide();
         this.refs.deleteModal.hide();
-        native.reportInsightApiEvent("deleteCourse", "error", e.code);
+        native.reportInsightApiEvent("deleteCourse", "error", JSON.stringify(e));
         alert("删除课程失败，请重试");
       });
   };
