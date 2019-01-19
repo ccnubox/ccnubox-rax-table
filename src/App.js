@@ -11,7 +11,7 @@ const native = require("@weex-module/test");
 import Header from "./header";
 import { parseSearchString } from "../box-ui/util";
 import Image from "rax-image";
-import Toast from 'universal-toast';
+import Toast from "universal-toast";
 
 var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
 if (day == -1) {
@@ -54,7 +54,15 @@ if (window.location.search) {
 const STATUS_BAR_HEIGHT = Number(qd.statusBarHeight[0]);
 const NAV_BAR_HEIGHT = Number(qd.navBarHeight[0]);
 const REFRESH_FLAG = Boolean(Number(qd.refresh[0]));
-const START_COUNT_DAY = qd.startCountDay[0];
+let START_COUNT_DAY = new Date(qd.startCountDay[0]);
+const START_COUNT_DAY_PRESET = new Date(qd.startCountDayPreset[0]);
+
+// 学期末，更新课程表时，如果预设学期开始时间是下学期的，就使用这个日期
+if (REFRESH_FLAG) {
+  if (START_COUNT_DAY_PRESET > START_COUNT_DAY) {
+    START_COUNT_DAY = START_COUNT_DAY_PRESET;
+  }
+}
 
 const TABLE_INITIAL_LEFT = 80;
 const TABLE_INITIAL_TOP = (45 + STATUS_BAR_HEIGHT) * 2 + 40 * 2;
@@ -469,7 +477,11 @@ class Table extends Component {
       .catch(e => {
         this.refs.lesson.hide();
         this.refs.deleteModal.hide();
-        native.reportInsightApiEvent("deleteCourse", "error", JSON.stringify(e));
+        native.reportInsightApiEvent(
+          "deleteCourse",
+          "error",
+          JSON.stringify(e)
+        );
         alert("删除课程失败，请重试");
       });
   };
@@ -764,7 +776,7 @@ function diff_weeks(dt1, dt2) {
 // FIX: 可以考虑使用 moment 库
 const calCurrentWeek = () => {
   let currentDate = new Date();
-  let startDate = new Date(START_COUNT_DAY);
+  let startDate = START_COUNT_DAY;
   return diff_weeks(startDate, currentDate);
 };
 

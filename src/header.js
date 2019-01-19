@@ -18,9 +18,6 @@ if (window.location.search) {
   alert("参数缺失错误 " + window.location);
 }
 
-const START_COUNT_DAY = new Date(qd.startCountDay[0]);
-const START_COUNT_DAY_PRESET = new Date(qd.startCountDayPreset[0]);
-
 class Header extends Component {
   constructor(props) {
     super(props);
@@ -35,6 +32,7 @@ class Header extends Component {
     };
   }
   componentWillMount() {
+    const { START_COUNT_DAY } = this.props;
     for (let i = 1; i <= 35; i++) {
       this.WeekOptions.push(i);
     }
@@ -118,6 +116,7 @@ class Header extends Component {
   };
 
   render() {
+    const { START_COUNT_DAY } = this.props;
     return (
       <View>
         <View
@@ -155,7 +154,7 @@ class Header extends Component {
                     }}
                     style={styles.dropdown_list}
                   >
-                    {START_COUNT_DAY_PRESET > new Date() && (
+                    {START_COUNT_DAY > new Date() && (
                       <View style={styles.option_container}>
                         <Touchable
                           onPress={() => {
@@ -261,7 +260,7 @@ class Header extends Component {
             }}
             style={[styles.add, this.props.btnStyle]}
           >
-            <View >
+            <View>
               <Text style={[styles.fresh_text]}>添课</Text>
             </View>
           </Touchable>
