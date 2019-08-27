@@ -193,10 +193,9 @@ class Table extends Component {
         });
         native.changeLoadingStatus(true);
         storage.getItem("SHOW_TIME_TIP", e => {
-          if (e.result === "success") {
-            storage.setItem("SHOW_TIME_TIP", "true", () => {});
-          } else {
+          if (e.result !== "success") {
             alert("新学期作息时间更新，点击左侧节次可查看对应节次时间");
+            storage.setItem("SHOW_TIME_TIP", "true", () => {});
           }
         });
       })
