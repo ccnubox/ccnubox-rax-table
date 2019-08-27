@@ -8,9 +8,13 @@ import PanResponder from "universal-panresponder";
 import TableService from "./services/table";
 import Modal from "rax-modal";
 const native = require("@weex-module/test");
+const storage = require("@weex-module/storage");
+import Image from "rax-image";
+import moment from "moment";
+
 import Header from "./header";
 import { parseSearchString } from "../box-ui/util";
-import Image from "rax-image";
+import { ORDER_TIME } from "./consts";
 
 var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
 if (day == -1) {
@@ -33,10 +37,10 @@ for (let i = 0; i < 7; i++) {
 const getEmptyCourseArray = () => {
   let emptyCourseArray = new Array(7);
   for (let i = 0; i < 7; i++) {
-    emptyCourseArray[i] = new Array(14);
+    emptyCourseArray[i] = new Array(12);
   }
   for (let i = 0; i < 7; i++) {
-    for (let j = 0; j < 14; j++) {
+    for (let j = 0; j < 12; j++) {
       emptyCourseArray[i][j] = new Array();
     }
   }
@@ -94,7 +98,7 @@ class Table extends Component {
     this.pwd = "";
     this.stuInfo = ""; // Base64(sid:pwd)
     (this.weekData = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]),
-      (this.order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]),
+      (this.order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
       (this.colors = ["#f6b37f", "#f29c9f", "#13b5b1", "#8372D3"]),
       (this.grey = "#8E8E93"),
       (this.weekDay = {
@@ -188,6 +192,13 @@ class Table extends Component {
           courseArray: this.setCourseArray(res, _CourseArray)
         });
         native.changeLoadingStatus(true);
+        storage.getItem("SHOW_TIME_TIP", e => {
+          if (e.result === "success") {
+            storage.setItem("SHOW_TIME_TIP", "true", () => {});
+          } else {
+            alert("新学期作息时间更新，点击左侧节次可查看对应节次时间");
+          }
+        });
       })
       .catch(e => {
         native.changeLoadingStatus(true);
@@ -202,9 +213,6 @@ class Table extends Component {
     native.changeLoadingStatus(false);
 
     native.getCookie(res => {
-      native.reportInsightApiEvent("getCookieForTable", "error", "500");
-      // 兜底：如果模拟登陆失败，不带 cookie 请求服务端
-
       if (res.code === "200") {
         this.getCourseFromServerImpl({
           sid: this.sid,
@@ -221,6 +229,7 @@ class Table extends Component {
           "学号或密码错误，请检查是否修改了 one.ccnu.edu.cn 的密码。如修改了密码，请在设置中退出登录后进入课程表重新登录"
         );
       } else {
+        // 兜底：如果模拟登陆失败，不带 cookie 请求服务端
         this.getCourseFromServerImpl({
           sid: this.sid,
           token: this.stuInfo
@@ -237,6 +246,7 @@ class Table extends Component {
         this.pwd = res.pwd;
         this.stuInfo = btoa(this.sid + ":" + "pwd");
         // URL 传参，强制刷新
+
         if (REFRESH_FLAG) {
           this.getCourseFromServer();
           return;
@@ -646,16 +656,22 @@ class Table extends Component {
         >
           {this.order.map(i => {
             return (
-              <View
-                style={[
-                  styles.order_grid,
-                  styles.order_width,
-                  styles.grid_height,
-                  styles.center
-                ]}
+              <Touchable
+                onPress={() => {
+                  alert(ORDER_TIME[i - 1]);
+                }}
               >
-                <Text>{i}</Text>
-              </View>
+                <View
+                  style={[
+                    styles.order_grid,
+                    styles.order_width,
+                    styles.grid_height,
+                    styles.center
+                  ]}
+                >
+                  <Text>{i}</Text>
+                </View>
+              </Touchable>
             );
           })}
         </View>
@@ -752,12 +768,15 @@ function diff_weeks(dt1, dt2) {
 }
 
 // 根据当前日期和学期初始日期，得出当前周数
-// FIX: startDate 从 0:00 开始
-// FIX: startDate 月份要加0
-// FIX: 可以考虑使用 moment 库
 const calCurrentWeek = () => {
+  // 找出开学日期所在周一
+  const weekOfday = moment(START_COUNT_DAY, "YYYY-MM-DD").format("E");
+  const lastMonday = moment(START_COUNT_DAY)
+    .subtract(weekOfday - 1, "days")
+    .format("YYYY/MM/DD");
+
   let currentDate = new Date();
-  let startDate = new Date(START_COUNT_DAY);
+  let startDate = new Date(lastMonday);
   return diff_weeks(startDate, currentDate);
 };
 
