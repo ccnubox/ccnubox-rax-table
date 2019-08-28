@@ -90,6 +90,9 @@ const TABLE_TOP_LIMIT =
 
 let ERROR_MESSAGE = "服务端错误，请求课程表失败";
 
+let retry_count = 0;
+const MAX_RETRY_COUNT = 2;
+
 // alert(screen.height / window.devicePixelRatio)
 class Table extends Component {
   constructor(props) {
@@ -183,6 +186,7 @@ class Table extends Component {
   };
 
   getCourseFromServerImpl = options => {
+    retry_count = retry_count + 1;
     let _CourseArray = this.state.courseArray;
     TableService.getTableList(options)
       .then(res => {
@@ -200,9 +204,13 @@ class Table extends Component {
         });
       })
       .catch(e => {
-        native.changeLoadingStatus(true);
         native.reportInsightApiEvent("getTableList", "error", "500");
-        alert(ERROR_MESSAGE);
+        if (retry_count !== MAX_RETRY_COUNT) {
+          this.getCourseFromServerImpl();
+        } else {
+          native.changeLoadingStatus(true);
+          alert(ERROR_MESSAGE);
+        }
       });
   };
 
