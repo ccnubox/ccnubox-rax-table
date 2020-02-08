@@ -53,7 +53,7 @@ class Add extends Component {
         "星期六",
         "星期日"
       ]),
-      (this.timeArr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
+      (this.timeArr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   }
   componentWillMount() {
     let tempArr = new Array(24);
@@ -71,6 +71,9 @@ class Add extends Component {
         this.weeks[i].push(i * 6 + j);
       }
     }
+  }
+
+  componentDidMount() {
   }
 
   onCourseChange = event => {
@@ -166,21 +169,18 @@ class Add extends Component {
     this.setState({
       day: day
     });
-    this.WeekScrollView.scrollTo({ y: (index - 2) * 80 });
   };
 
   chooseStart = (item, index) => {
     this.setState({
       startTime: item
     });
-    this.StartScrollView.scrollTo({ y: (index - 2) * 80 });
   };
 
   chooseEnd = (item, index) => {
     this.setState({
       endTime: item
     });
-    this.EndScrollView.scrollTo({ y: (index - 2) * 80 });
   };
   confirmTime = () => {
     if (this.state.startTime > this.state.endTime) {
@@ -259,7 +259,7 @@ class Add extends Component {
             style={[styles.input_box, styles.time_choose]}
           >
             <Text style={[styles.input_word, styles.center, styles.time_word]}>
-              {this.state.timeHasValue ? "修改上课时间" : "选择上课时间"}
+              {this.state.timeHasValue ? `时间: ${this.state.day} ${this.state.startTime}-${this.state.endTime}  点击修改` : "选择上课时间"}
             </Text>
           </Touchable>
           <TextInput
@@ -407,11 +407,6 @@ class Add extends Component {
         <Modal
           ref="timeModal"
           contentStyle={[styles.modal]}
-          onHide={() => {
-            this.setState({
-              timeHasValue: true
-            });
-          }}
         >
           <View style={[styles.modal_header, styles.center]}>
             <Touchable onPress={this.hideTime}>
@@ -426,7 +421,7 @@ class Add extends Component {
               ref={scrollView => {
                 this.WeekScrollView = scrollView;
               }}
-              style={[styles.time_scroll, styles.equal_div]}
+              style={[styles.time_scroll]}
               showsVerticalScrollIndicator={false}
             >
               {this.weekdays.map((day, index) => {
@@ -453,7 +448,7 @@ class Add extends Component {
               ref={scrollView => {
                 this.StartScrollView = scrollView;
               }}
-              style={[styles.time_scroll, styles.equal_div]}
+              style={[styles.time_scroll]}
               showsVerticalScrollIndicator={false}
             >
               {this.timeArr.map((item, index) => {
@@ -481,7 +476,7 @@ class Add extends Component {
               ref={scrollView => {
                 this.EndScrollView = scrollView;
               }}
-              style={[styles.time_scroll, styles.equal_div]}
+              style={[styles.time_scroll]}
               showsVerticalScrollIndicator={false}
             >
               {this.timeArr.map((item, index) => {
