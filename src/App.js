@@ -268,7 +268,7 @@ class Table extends Component {
       if (res.code === "200") {
         this.sid = res.sid;
         this.pwd = res.pwd;
-        this.stuInfo = btoa(res.sid + ":x" + res.pwd);
+        this.stuInfo = btoa(res.sid + ":" + res.pwd);
         // URL 传参，强制刷新
 
         if (REFRESH_FLAG) {
