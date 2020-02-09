@@ -8,6 +8,17 @@ const TableService = {
         "https://ccnubox.muxixyz.com/api/msg/?os=ios&page=com.muxistudio.table.main"
     });
   },
+  getTableListV2(options) {
+    let headers = {
+      Accept: "application/json",
+      Authorization: `Basic ${options.token}`
+    };
+    return request({
+      method: "GET",
+      url: "https://ccnubox.muxixyz.com/api/table/v2",
+      headers
+    });
+  },
   getTableList(options) {
     let headers = {
       Accept: "application/json",
@@ -29,6 +40,16 @@ const TableService = {
       headers
     });
   },
+  addLessonV2(data, token) {
+    return request({
+      method: "POST",
+      url: "https://ccnubox.muxixyz.com/api/table/v2",
+      headers: {
+        Authorization: "Basic " + token
+      },
+      body: data
+    });
+  },
   addLesson(big, sid, jid, password, data) {
     return request({
       method: "POST",
@@ -40,6 +61,18 @@ const TableService = {
         Authorization: "Basic " + btoa(sid + ":" + password)
       },
       body: data
+    });
+  },
+  deleteLessonV2(options) {
+    let headers = {
+      Accept: "application/json",
+      Authorization: "Basic " + btoa(options.sid + ":" + options.pwd)
+    };
+
+    return request({
+      method: "DELETE",
+      url: "https://ccnubox.muxixyz.com/api/table/v2?id=" + options.id,
+      headers
     });
   },
   deleteLesson(options) {
