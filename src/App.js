@@ -224,7 +224,7 @@ class Table extends Component {
   getCourseFromServer = () => {
     if (!this.checkLogin()) return;
     this.reset();
-    native.changeLoadingStatus(false);
+    // native.changeLoadingStatus(false);
 
     this.getCourseFromServerImpl({
       sid: this.sid,
