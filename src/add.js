@@ -74,6 +74,17 @@ class Add extends Component {
 
   componentDidMount() {}
 
+  handleAuthError = e => {
+    const data = JSON.parse(e.data);
+    if (data.code === 20104) {
+      alert(
+        "学号或密码错误，请检查是否修改了 one.ccnu.edu.cn 的密码。如修改了密码，请在设置中退出登录后进入课程表重新登录"
+      );
+    } else {
+      alert("服务端错误：401");
+    }
+  };
+
   onCourseChange = event => {
     this.setState({
       course: event.nativeEvent.text
@@ -163,7 +174,7 @@ class Add extends Component {
     });
   };
 
-  chooseDay = (day) => {
+  chooseDay = day => {
     this.setState({
       day
     });
@@ -207,7 +218,7 @@ class Add extends Component {
       day: String(this.state.day + 1),
       start: String(this.state.startTime),
       during: String(this.state.endTime - this.state.startTime + 1),
-      place: this.state.place,
+      place: this.state.place
     };
     native.getStuInfo(res => {
       if (res.code === "200") {
@@ -218,6 +229,11 @@ class Add extends Component {
             native.backToTableMain();
           })
           .catch(e => {
+            if (e.status === 401) {
+              this.handleAuthError(e);
+              native.backToTableMain();
+              return;
+            }
             native.reportInsightApiEvent("addCourse", "error", e.code);
             alert("添加课程错误，请重试");
             native.backToTableMain();
@@ -265,7 +281,9 @@ class Add extends Component {
           >
             <Text style={[styles.input_word, styles.center, styles.time_word]}>
               {this.state.timeHasValue
-                ? `时间: ${this.weekdays[this.state.day]} ${this.state.startTime}-${this.state.endTime}  点击修改`
+                ? `时间: ${this.weekdays[this.state.day]} ${
+                    this.state.startTime
+                  }-${this.state.endTime}  点击修改`
                 : "选择上课时间"}
             </Text>
           </Touchable>

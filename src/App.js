@@ -208,6 +208,10 @@ class Table extends Component {
         // });
       })
       .catch(e => {
+        if (e.status === 401) {
+          this.handleAuthError(e);
+          return;
+        }
         native.reportInsightApiEvent("getTableList", "error", "500");
         native.changeLoadingStatus(true);
         confirm(`${ERROR_MESSAGE}, 是否重试？`).then(() => {
@@ -215,6 +219,18 @@ class Table extends Component {
         });
         // alert(ERROR_MESSAGE);
       });
+  };
+
+  handleAuthError = e => {
+    const data = JSON.parse(e.data)
+    if (data.code === 20104) {
+      alert(
+        "学号或密码错误，请检查是否修改了 one.ccnu.edu.cn 的密码。如修改了密码，请在设置中退出登录后进入课程表重新登录"
+      );
+    } else {
+      alert("服务端错误：401");
+    }
+    native.changeLoadingStatus(true);
   };
 
   getCourseFromServer = () => {
@@ -252,7 +268,7 @@ class Table extends Component {
       if (res.code === "200") {
         this.sid = res.sid;
         this.pwd = res.pwd;
-        this.stuInfo = btoa(res.sid + ":" + res.pwd);
+        this.stuInfo = btoa(res.sid + ":x" + res.pwd);
         // URL 传参，强制刷新
 
         if (REFRESH_FLAG) {
@@ -490,6 +506,12 @@ class Table extends Component {
       .catch(e => {
         this.refs.lesson.hide();
         this.refs.deleteModal.hide();
+
+        if (e.status === 401) {
+          this.handleAuthError(e);
+          return;
+        }
+
         native.reportInsightApiEvent(
           "deleteCourse",
           "error",
