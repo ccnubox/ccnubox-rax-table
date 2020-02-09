@@ -10,6 +10,7 @@ import BoxButton from "../box-ui/common/button";
 import Modal from "rax-modal";
 import { parseSearchString } from "../box-ui/util";
 const native = require("@weex-module/test");
+import Toast from "universal-toast";
 
 let qd = {};
 // 获取查询参数
@@ -27,10 +28,9 @@ class Add extends Component {
       teacher: "",
       course: "",
       weeks: "",
-      day: "",
+      day: 0,
       during: 2,
       place: "",
-      day: "星期一",
       startTime: 1,
       endTime: 2,
       weeksArray: [],
@@ -72,8 +72,7 @@ class Add extends Component {
     }
   }
 
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
   onCourseChange = event => {
     this.setState({
@@ -164,9 +163,9 @@ class Add extends Component {
     });
   };
 
-  chooseDay = (day, index) => {
+  chooseDay = (day) => {
     this.setState({
-      day: day
+      day
     });
   };
 
@@ -204,22 +203,30 @@ class Add extends Component {
     let course = {
       course: this.state.course,
       teacher: this.state.teacher,
-      weeks: this.state.weeksArray.toString(),
-      day: this.state.day,
-      start: this.state.startTime,
-      during: this.state.endTime - this.state.startTime + 1,
+      weeks: this.state.weeksArray,
+      day: String(this.state.day + 1),
+      start: String(this.state.startTime),
+      during: String(this.state.endTime - this.state.startTime + 1),
       place: this.state.place,
-      remind: false
     };
-    TableService.addLesson("xxx", SID, "xxx", "ccccc", course)
-      .then(res => {
-        native.backToTableMain();
-      })
-      .catch(e => {
-        native.reportInsightApiEvent("addCourse", "error", e.code);
-        alert("添加课程错误，请重试");
-        native.backToTableMain();
-      });
+    native.getStuInfo(res => {
+      if (res.code === "200") {
+        const stuInfo = btoa(res.sid + ":" + res.pwd);
+        TableService.addLessonV2(course, stuInfo)
+          .then(res => {
+            Toast.show("添加课程成功！", Toast.SHORT);
+            native.backToTableMain();
+          })
+          .catch(e => {
+            native.reportInsightApiEvent("addCourse", "error", e.code);
+            alert("添加课程错误，请重试");
+            native.backToTableMain();
+          });
+      } else {
+        // 理论上不会走到这个分支，因为课程表有登录 guard
+        alert("未登录");
+      }
+    });
   };
   render() {
     return (
@@ -229,12 +236,14 @@ class Add extends Component {
             placeholder="请输入课程名称"
             value={this.state.course}
             style={[styles.input_box]}
+            onInput={this.onCourseChange}
             onChange={this.onCourseChange}
           />
           <TextInput
             placeholder="请输入任教教师"
             value={this.state.teacher}
             style={[styles.input_box]}
+            onInput={this.onTeacherChange}
             onChange={this.onTeacherChange}
           />
         </View>
@@ -255,13 +264,16 @@ class Add extends Component {
             style={[styles.input_box, styles.time_choose]}
           >
             <Text style={[styles.input_word, styles.center, styles.time_word]}>
-              {this.state.timeHasValue ? `时间: ${this.state.day} ${this.state.startTime}-${this.state.endTime}  点击修改` : "选择上课时间"}
+              {this.state.timeHasValue
+                ? `时间: ${this.weekdays[this.state.day]} ${this.state.startTime}-${this.state.endTime}  点击修改`
+                : "选择上课时间"}
             </Text>
           </Touchable>
           <TextInput
             placeholder="请输入上课地点"
             value={this.state.place}
             style={[styles.input_box]}
+            onInput={this.onPlaceChange}
             onChange={this.onPlaceChange}
           />
         </View>
@@ -399,10 +411,7 @@ class Add extends Component {
             </View>
           </View>
         </Modal>
-        <Modal
-          ref="timeModal"
-          contentStyle={[styles.modal]}
-        >
+        <Modal ref="timeModal" contentStyle={[styles.modal]}>
           <View style={[styles.modal_header, styles.center]}>
             <Touchable onPress={this.hideTime}>
               <Text style={[styles.purple_text]}>取消</Text>
@@ -423,14 +432,14 @@ class Add extends Component {
                 return (
                   <Touchable
                     onPress={() => {
-                      this.chooseDay(day, index);
+                      this.chooseDay(index);
                     }}
                     style={[styles.time_item, styles.center]}
                   >
                     <Text
                       style={{
-                        fontSize: this.state.day === day ? 35 : 30,
-                        color: this.state.day === day ? "#6767fa" : "#000000"
+                        fontSize: this.state.day === index ? 35 : 30,
+                        color: this.state.day === index ? "#6767fa" : "#000000"
                       }}
                     >
                       {day}

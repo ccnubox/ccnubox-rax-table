@@ -15,6 +15,7 @@ import moment from "moment";
 import Header from "./header";
 import { parseSearchString } from "../box-ui/util";
 import { confirm } from "../box-ui/common/modal";
+import Toast from "universal-toast";
 import { ORDER_TIME } from "./consts";
 
 var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
@@ -58,7 +59,15 @@ if (window.location.search) {
 const STATUS_BAR_HEIGHT = Number(qd.statusBarHeight[0]);
 const NAV_BAR_HEIGHT = Number(qd.navBarHeight[0]);
 const REFRESH_FLAG = Boolean(Number(qd.refresh[0]));
-const START_COUNT_DAY = qd.startCountDay[0];
+let START_COUNT_DAY = new Date(qd.startCountDay[0]);
+const START_COUNT_DAY_PRESET = new Date(qd.startCountDayPreset[0]);
+
+// 学期末，更新课程表时，如果预设学期开始时间是下学期的，就使用这个日期
+if (REFRESH_FLAG) {
+  if (START_COUNT_DAY_PRESET > START_COUNT_DAY) {
+    START_COUNT_DAY = START_COUNT_DAY_PRESET;
+  }
+}
 
 const TABLE_INITIAL_LEFT = 80;
 const TABLE_INITIAL_TOP = (45 + STATUS_BAR_HEIGHT) * 2 + 40 * 2;
@@ -102,15 +111,6 @@ class Table extends Component {
       (this.order = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
       (this.colors = ["#f6b37f", "#f29c9f", "#13b5b1", "#8372D3"]),
       (this.grey = "#8E8E93"),
-      (this.weekDay = {
-        星期一: 0,
-        星期二: 1,
-        星期三: 2,
-        星期四: 3,
-        星期五: 4,
-        星期六: 5,
-        星期日: 6
-      }),
       // (this.lesson = new Map()),
       (this.state = {
         loading: true,
@@ -168,8 +168,8 @@ class Table extends Component {
   }
 
   setCourseArray = (res, _CourseArray) => {
-    res.map(lesson => {
-      let i = this.weekDay[lesson.day];
+    res.map((lesson, index) => {
+      let i = Number(lesson.day) - 1; // 服务端的周数是从 1 开始的，要减一
       let start = parseInt(lesson.start);
       let during = parseInt(lesson.during);
 
@@ -177,7 +177,10 @@ class Table extends Component {
         if (_CourseArray[i][j - 1] == undefined) {
           _CourseArray[i][j - 1] = [];
         }
-        _CourseArray[i][j - 1].push(lesson);
+        _CourseArray[i][j - 1].push({
+          ...lesson,
+          day: lesson.day - 1
+        });
       }
     });
     return _CourseArray;
@@ -185,20 +188,24 @@ class Table extends Component {
 
   getCourseFromServerImpl = options => {
     let _CourseArray = this.state.courseArray;
-    TableService.getTableList(options)
+    TableService.getTableListV2(options)
       .then(res => {
         native.reportInsightApiEvent("getTableList", "success", "null");
-        native.saveCachedTable(JSON.stringify(res));
+        native.saveCachedTable(JSON.stringify(res.data.table));
+        storage.setItem("RESET_TABLE_CACHE", "true", () => {});
+
+        const courseArray = this.setCourseArray(res.data.table, _CourseArray);
         this.setState({
-          courseArray: this.setCourseArray(res, _CourseArray)
+          courseArray
         });
         native.changeLoadingStatus(true);
-        storage.getItem("SHOW_TIME_TIP", e => {
-          if (e.result !== "success") {
-            alert("新学期作息时间更新，点击左侧节次可查看对应节次时间");
-            storage.setItem("SHOW_TIME_TIP", "true", () => {});
-          }
-        });
+        // storage.setItem("RESET_TABLE_CACHE", "true", () => {});
+        // storage.getItem("SHOW_TIME_TIP", e => {
+        //   if (e.result !== "success") {
+        //     alert("新学期作息时间更新，点击左侧节次可查看对应节次时间");
+        //     storage.setItem("SHOW_TIME_TIP", "true", () => {});
+        //   }
+        // });
       })
       .catch(e => {
         native.reportInsightApiEvent("getTableList", "error", "500");
@@ -213,32 +220,30 @@ class Table extends Component {
   getCourseFromServer = () => {
     if (!this.checkLogin()) return;
     this.reset();
-    native.changeLoadingStatus(false);
+    // native.changeLoadingStatus(false);
 
-    native.getCookie(res => {
-      if (res.code === "200") {
-        this.getCourseFromServerImpl({
-          sid: this.sid,
-          token: this.stuInfo,
-          cookie: {
-            Jsessionid: res.cookieJ,
-            Bigipserverpool: res.cookieB
-          }
-        });
-      } else if (res.code === "401") {
-        native.changeLoadingStatus(true);
-        native.reportInsightApiEvent("getCookieForTable", "error", "401");
-        alert(
-          "学号或密码错误，请检查是否修改了 one.ccnu.edu.cn 的密码。如修改了密码，请在设置中退出登录后进入课程表重新登录"
-        );
-      } else {
-        // 兜底：如果模拟登陆失败，不带 cookie 请求服务端
-        this.getCourseFromServerImpl({
-          sid: this.sid,
-          token: this.stuInfo
-        });
-      }
+    this.getCourseFromServerImpl({
+      sid: this.sid,
+      token: this.stuInfo
     });
+
+    // native.getCookie(res => {
+    //   if (res.code === "200") {
+
+    //   } else if (res.code === "401") {
+    //     native.changeLoadingStatus(true);
+    //     native.reportInsightApiEvent("getCookieForTable", "error", "401");
+    //     alert(
+    //       "学号或密码错误，请检查是否修改了 one.ccnu.edu.cn 的密码。如修改了密码，请在设置中退出登录后进入课程表重新登录"
+    //     );
+    //   } else {
+    //     // 兜底：如果模拟登陆失败，不带 cookie 请求服务端
+    //     this.getCourseFromServerImpl({
+    //       sid: this.sid,
+    //       token: this.stuInfo
+    //     });
+    //   }
+    // });
   };
 
   initCourseData = () => {
@@ -247,27 +252,35 @@ class Table extends Component {
       if (res.code === "200") {
         this.sid = res.sid;
         this.pwd = res.pwd;
-        this.stuInfo = btoa(this.sid + ":" + "pwd");
+        this.stuInfo = btoa(res.sid + ":" + res.pwd);
         // URL 传参，强制刷新
 
         if (REFRESH_FLAG) {
           this.getCourseFromServer();
           return;
         }
-        native.getCachedTable(res => {
-          if (res.code === "404") {
-            this.getCourseFromServer();
-          } else {
-            let _CourseArray = this.state.courseArray;
-            this.setState({
-              courseArray: this.setCourseArray(
-                JSON.parse(res.result),
-                _CourseArray
-              )
+        storage.getItem("RESET_TABLE_CACHE", e => {
+          if (e.result === "success") {
+            native.getCachedTable(res => {
+              if (res.code === "404") {
+                this.getCourseFromServer();
+              } else {
+                let _CourseArray = this.state.courseArray;
+                this.setState({
+                  courseArray: this.setCourseArray(
+                    JSON.parse(res.result),
+                    _CourseArray
+                  )
+                });
+                native.changeLoadingStatus(true);
+              }
             });
+          } else {
+            this.getCourseFromServer();
           }
         });
       } else {
+        native.changeLoadingStatus(true);
         // 理论上不会走到这个分支，因为课程表有登录 guard
         alert("未登录");
       }
@@ -320,12 +333,12 @@ class Table extends Component {
         )
       ) {
         this._tableStyles.style.top = this._previousTop + gestureState.dy;
-        native.log(
-          String(this._tableStyles.style.top + " " + String(TABLE_TOP_LIMIT))
-        );
-        native.log(
-          String(screen.height) + " " + String(window.devicePixelRatio)
-        );
+        // native.log(
+        //   String(this._tableStyles.style.top + " " + String(TABLE_TOP_LIMIT))
+        // );
+        // native.log(
+        //   String(screen.height) + " " + String(window.devicePixelRatio)
+        // );
         // 越界检查，超出边界时 reset
         if (this._tableStyles.style.top <= TABLE_TOP_LIMIT) {
           this._tableStyles.style.top = TABLE_TOP_LIMIT;
@@ -406,10 +419,9 @@ class Table extends Component {
   hideLesson = () => {
     this.refs.lesson.hide();
   };
+
   inArray = (s, week) => {
-    let arr = [];
-    arr = s.split(",");
-    if (arr.indexOf(week.toString()) != -1) {
+    if (s.indexOf(week) !== -1) {
       return true;
     }
     return false;
@@ -462,26 +474,33 @@ class Table extends Component {
 
   deleteCourse = () => {
     if (!this.checkLogin()) return;
+
     let options = {
       id: this.state.courseDeleting.id,
       sid: this.sid,
-      pwd: this.pwd,
-      stuInfo: btoa(this.sid + ":" + this.pwd)
+      pwd: this.pwd
     };
-    TableService.deleteLesson(options)
+    TableService.deleteLessonV2(options)
       .then(res => {
+        this.refs.lesson.hide();
         this.refs.deleteModal.hide();
+        Toast.show("删除课程成功！", Toast.SHORT);
         this.getCourseFromServer();
       })
       .catch(e => {
+        this.refs.lesson.hide();
         this.refs.deleteModal.hide();
-        native.reportInsightApiEvent("deleteCourse", "error", e.code);
+        native.reportInsightApiEvent(
+          "deleteCourse",
+          "error",
+          JSON.stringify(e)
+        );
         alert("删除课程失败，请重试");
       });
   };
 
   calcWeek = weeks => {
-    let arr = weeks.split(",").map(i => {
+    let arr = weeks.map(i => {
       return parseInt(i);
     });
     arr.sort(function(a, b) {
@@ -536,9 +555,12 @@ class Table extends Component {
             >
               {column.map((list, i) => {
                 if (list.length > 0) {
-                  let flag = this.hasCourse(list, this.props.currentWeek).flag;
-                  let item = this.hasCourse(list, this.props.currentWeek)
-                    .course;
+                  const hasCourse = this.hasCourse(
+                    list,
+                    this.props.currentWeek
+                  );
+                  let { flag, course: item } = hasCourse;
+
                   // 如果不加list.length == 1 && flag == false，会出现有课但是由于不是当前周、开始节而不显示
                   // i === parseInt(item.start) - 1是防止后面的课因节数较多而把重叠的节数少的另一门课覆盖
                   if (
@@ -551,7 +573,7 @@ class Table extends Component {
                           styles.item_center,
                           styles.daily_lesson,
                           {
-                            width: this.weekDay[item.day] == day ? 200 : 100,
+                            width: item.day == day ? 200 : 100,
                             height: parseInt(item.during) * 100,
                             position: "absolute",
                             top: (parseInt(item.start) - 1) * 100
@@ -563,7 +585,11 @@ class Table extends Component {
                           delayPressIn={400}
                           delayPressOut={1000}
                           delayLongPress={800}
-                          onLongPress={() => this.showDelete(list.length, item)}
+                          onLongPress={() => {
+                            if (item.source === "user") {
+                              this.showDelete(list.length, item);
+                            }
+                          }}
                           style={[
                             styles.lesson_grid_center,
                             {
@@ -581,7 +607,7 @@ class Table extends Component {
                                 styles.lesson_item,
                                 {
                                   backgroundColor: flag
-                                    ? this.colors[parseInt(item.color)]
+                                    ? this.colors[item.color]
                                     : this.grey,
                                   width: index == day ? 188 : 88
                                 }
@@ -614,8 +640,7 @@ class Table extends Component {
                               style={[
                                 styles.more,
                                 {
-                                  marginLeft:
-                                    this.weekDay[item.day] == day ? 178 : 78
+                                  marginLeft: item.day == day ? 178 : 78
                                 }
                               ]}
                             />
@@ -661,7 +686,7 @@ class Table extends Component {
             return (
               <Touchable
                 onPress={() => {
-                  alert(ORDER_TIME[i - 1]);
+                  alert(`上课时间：${ORDER_TIME[i - 1]}`);
                 }}
               >
                 <View
@@ -707,7 +732,11 @@ class Table extends Component {
                 delayPressIn={400}
                 delayPressOut={1000}
                 delayLongPress={800}
-                onLongPress={() => this.showDelete(1, course)}
+                onLongPress={() => {
+                  if (course.source === "user") {
+                    this.showDelete(1, course);
+                  }
+                }}
               >
                 <View style={[styles.item_center, styles.modal_cards]}>
                   <Text
