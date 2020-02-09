@@ -14,6 +14,7 @@ import moment from "moment";
 
 import Header from "./header";
 import { parseSearchString } from "../box-ui/util";
+import { confirm } from "../box-ui/common/modal";
 import { ORDER_TIME } from "./consts";
 
 var day = new Date().getDay() - 1; // 本周的第几天,Sunday - Saturday : 0 - 6
@@ -89,9 +90,6 @@ const TABLE_TOP_LIMIT =
   2;
 
 let ERROR_MESSAGE = "服务端错误，请求课程表失败";
-
-let retry_count = 0;
-const MAX_RETRY_COUNT = 2;
 
 // alert(screen.height / window.devicePixelRatio)
 class Table extends Component {
@@ -186,7 +184,6 @@ class Table extends Component {
   };
 
   getCourseFromServerImpl = options => {
-    retry_count = retry_count + 1;
     let _CourseArray = this.state.courseArray;
     TableService.getTableList(options)
       .then(res => {
@@ -205,12 +202,11 @@ class Table extends Component {
       })
       .catch(e => {
         native.reportInsightApiEvent("getTableList", "error", "500");
-        if (retry_count !== MAX_RETRY_COUNT) {
-          this.getCourseFromServerImpl();
-        } else {
-          native.changeLoadingStatus(true);
-          alert(ERROR_MESSAGE);
-        }
+        native.changeLoadingStatus(true);
+        confirm(`${ERROR_MESSAGE}, 是否重试？`).then(() => {
+          this.getCourseFromServer();
+        });
+        // alert(ERROR_MESSAGE);
       });
   };
 
