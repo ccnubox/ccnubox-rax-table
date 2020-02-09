@@ -1,7 +1,7 @@
 {
   "name": "ccnubox-rax-table",
   "author": "MFE",
-  "version": "2.1.4-rc2",
+  "version": "2.1.7",
   "scripts": {
     "start": "rax-scripts start",
     "build": "rax-scripts build",
