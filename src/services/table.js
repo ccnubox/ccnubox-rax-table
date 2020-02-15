@@ -11,8 +11,10 @@ const TableService = {
   getTableListV2(options) {
     let headers = {
       Accept: "application/json",
-      Authorization: `Basic ${options.token}`
+      Authorization: `Basic ${options.token}`,
+      "X-token": `Basic ${options.token}`
     };
+
     return request({
       method: "GET",
       url: "https://ccnubox.muxixyz.com/api/table/v2",
@@ -45,7 +47,8 @@ const TableService = {
       method: "POST",
       url: "https://ccnubox.muxixyz.com/api/table/v2",
       headers: {
-        Authorization: "Basic " + token
+        Authorization: "Basic " + token,
+        "X-token": "Basic " + token
       },
       body: data
     });
@@ -66,7 +69,8 @@ const TableService = {
   deleteLessonV2(options) {
     let headers = {
       Accept: "application/json",
-      Authorization: "Basic " + btoa(options.sid + ":" + options.pwd)
+      Authorization: "Basic " + btoa(options.sid + ":" + options.pwd),
+      "X-token": "Basic " + btoa(options.sid + ":" + options.pwd)
     };
 
     return request({
