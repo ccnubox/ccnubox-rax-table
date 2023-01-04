@@ -26,7 +26,7 @@
     "universal-toast": "^0.6.5"
   },
   "devDependencies": {
-    "rax-scripts": "^0.5.4",
+    "rax-scripts": "^2.0.4",
     "babel-eslint": "^7.1.0",
     "eslint": "^3.10.0"
   }
